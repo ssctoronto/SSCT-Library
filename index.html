@@ -1911,21 +1911,42 @@ function escH(s){return String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;')
 async function fbSyncPull(manual){
   const btn=document.getElementById('pull-btn');
   if(btn&&manual){btn.textContent='↓ Loading…';btn.disabled=true;}
-  setSyncStatus('Loading from shared database…',null);
+  if(manual) setSyncStatus('Loading from shared database…',null);
   try{
     const [fbBooks,fbLoans,fbBorr]=await Promise.all([fbLoad('books'),fbLoad('loans'),fbLoad('borrowers')]);
-    let updated=false;
-    if(fbBooks&&fbBooks.length>0){books=fbBooks;loadCoversLocally();updated=true;}
-    if(fbLoans&&fbLoans.length>0){loans=fbLoans;updated=true;}
-    if(fbBorr&&fbBorr.length>0){borrowers=fbBorr;updated=true;}
-    if(updated){
-      try{localStorage.setItem('gw_books',JSON.stringify(books));localStorage.setItem('gw_loans',JSON.stringify(loans));localStorage.setItem('gw_borrowers',JSON.stringify(borrowers));}catch(e){}
-      renderDash();
-      setSyncStatus('✓ Loaded '+books.length+' books, '+borrowers.length+' borrowers from shared database',true);
-    }else{
-      setSyncStatus(books.length>0?books.length+' books loaded (local) — push to share':'Database empty — add books and push',null);
+    let changed=false;
+
+    // MERGE Firebase data with local — never lose local-only items
+    if(fbBooks&&fbBooks.length>0){
+      const merged=[...fbBooks];
+      books.forEach(local=>{
+        if(!merged.find(fb=>fb.id===local.id)) merged.push(local);
+      });
+      if(merged.length!==books.length){books=merged;loadCoversLocally();changed=true;}
     }
-  }catch(e){setSyncStatus('Working offline — '+e.message,false);}
+    if(fbLoans&&fbLoans.length>0){
+      const merged=[...fbLoans];
+      loans.forEach(local=>{if(!merged.find(fb=>fb.id===local.id))merged.push(local);});
+      if(merged.length!==loans.length){loans=merged;changed=true;}
+    }
+    if(fbBorr&&fbBorr.length>0){
+      const merged=[...fbBorr];
+      borrowers.forEach(local=>{if(!merged.find(fb=>fb.id===local.id))merged.push(local);});
+      if(merged.length!==borrowers.length){borrowers=merged;changed=true;}
+    }
+
+    if(changed){
+      try{localStorage.setItem('gw_books',JSON.stringify(books));localStorage.setItem('gw_loans',JSON.stringify(loans));localStorage.setItem('gw_borrowers',JSON.stringify(borrowers));}catch(e){}
+      // Re-render current tab
+      const activeTab=document.querySelector('.tab.active');
+      if(activeTab){const tabName=TABS[Array.from(document.querySelectorAll('.tab')).indexOf(activeTab)];if(tabName)({dashboard:renderDash,catalog:renderCatalog,borrowers:renderBorrowers,lending:renderLending,overdues:renderOverdues,checkout:renderCheckout})[tabName]?.();}
+      if(manual) setSyncStatus('✓ Synced — '+books.length+' books total',true);
+    } else {
+      if(manual) setSyncStatus('✓ Already up to date — '+books.length+' books',true);
+    }
+  }catch(e){
+    if(manual) setSyncStatus('Could not reach database — '+e.message,false);
+  }
   if(btn&&manual){btn.textContent='↓ Pull from database';btn.disabled=false;}
 }
 function setSyncStatus(msg,ok){
