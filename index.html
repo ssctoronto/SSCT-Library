@@ -486,12 +486,14 @@ pre.code-block{
   input,select,textarea{font-size:16px}
 }
 
-.pub-action-grid { grid-template-columns: 1fr 1fr; }
+.pub-action-grid { grid-template-columns: 1fr 1fr 1fr; }
+@media(max-width:900px){ .pub-action-grid { grid-template-columns: 1fr 1fr; } }
 @media(max-width:600px){ .pub-action-grid { grid-template-columns: 1fr; } }
 
 .rev-star { user-select:none; }
 
-.pub-action-grid { grid-template-columns: 1fr 1fr; }
+.pub-action-grid { grid-template-columns: 1fr 1fr 1fr; }
+@media(max-width:900px){ .pub-action-grid { grid-template-columns: 1fr 1fr; } }
 @media(max-width:600px){ .pub-action-grid { grid-template-columns: 1fr; } }
 .rev-star { user-select:none; }
 .staff-tab { display:none; }
@@ -631,7 +633,7 @@ pre.code-block{
 
   <!-- Navigation -->
   <nav id="main-nav">
-    <button class="tab active" onclick="showTab('public')" style="color:var(--navy);font-weight:600">Library Catalogue</button>
+    <button class="tab active" onclick="showTab('public')">Library Catalogue</button>
     <button class="tab staff-tab" onclick="showTab('dashboard')">Dashboard</button>
     <button class="tab staff-tab" onclick="showTab('catalog')">Catalogue</button>
     <button class="tab staff-tab" onclick="showTab('addbook')">Add Book</button>
@@ -802,6 +804,8 @@ const TABS=['public','dashboard','catalog','addbook','borrowers','lending','over
 let books=[],loans=[],borrowers=[],selectedLabels=new Set(),selectedCards=new Set();
 let catFilter='all',searchQ='',bSearchQ='';
 let addMsg='',coMsg='',brMsg='',lookupData=null,lookupLoading=false,titleSearchLoading=false;
+let isStaff=false;
+const STAFF_PASSWORD='ssct2024';
 
 function catInfo(id){return CATS.find(c=>c.id===id)||{label:id,short:'BK'}}
 function isScrip(cat){return SCATS.includes(cat)}
@@ -1869,17 +1873,44 @@ function toggleStaffLogin(){
       updateStaffMode();
       showTab('public');
     }
+    return;
+  }
+  // Show inline login form
+  const existing=document.getElementById('staff-login-form');
+  if(existing){existing.remove();return;}
+  const form=document.createElement('div');
+  form.id='staff-login-form';
+  form.style.cssText='position:fixed;top:60px;right:16px;background:#fff;border:2px solid var(--gold);border-radius:12px;padding:16px 20px;z-index:8000;box-shadow:0 8px 32px rgba(0,0,0,.2);min-width:260px';
+  form.innerHTML=`
+    <div style="font-size:14px;font-weight:700;color:var(--navy);margin-bottom:12px">🔐 Staff Login</div>
+    <input type="password" id="staff-pw-input" placeholder="Enter staff password" style="margin-bottom:10px" autofocus>
+    <div style="display:flex;gap:8px">
+      <button class="btn btn-primary" style="flex:1" onclick="submitStaffLogin()">Login</button>
+      <button class="btn" onclick="document.getElementById('staff-login-form').remove()">Cancel</button>
+    </div>
+    <div id="staff-login-msg" style="font-size:12px;color:#b63a3a;margin-top:8px"></div>`;
+  document.body.appendChild(form);
+  setTimeout(()=>{const inp=document.getElementById('staff-pw-input');if(inp)inp.focus();},100);
+  // Allow Enter key
+  form.addEventListener('keydown',e=>{if(e.key==='Enter')submitStaffLogin();if(e.key==='Escape')form.remove();});
+}
+
+function submitStaffLogin(){
+  const inp=document.getElementById('staff-pw-input');
+  if(!inp)return;
+  const pw=inp.value;
+  const msg=document.getElementById('staff-login-msg');
+  if(pw===STAFF_PASSWORD){
+    isStaff=true;
+    localStorage.setItem('ssct_staff','1');
+    const form=document.getElementById('staff-login-form');
+    if(form)form.remove();
+    updateStaffMode();
+    showTab('dashboard');
   } else {
-    const pw=prompt('Enter staff password:');
-    if(pw===STAFF_PASSWORD){
-      isStaff=true;
-      localStorage.setItem('ssct_staff','1');
-      updateStaffMode();
-      showTab('dashboard');
-      alert('✓ Logged in as staff');
-    } else if(pw!==null){
-      alert('Incorrect password');
-    }
+    if(msg)msg.textContent='Incorrect password. Try again.';
+    inp.value='';
+    inp.focus();
   }
 }
 
@@ -1912,86 +1943,203 @@ function renderPublic(){
   const loanMap={};activeLoans().forEach(l=>{loanMap[l.bookId]=l;});
   const q=(document.getElementById('pub-search')||{}).value||'';
   const catF=(document.getElementById('pub-cat-filter')||{}).value||'all';
+  const page=window._pubPage||0;
+  const perPage=24;
+
   let filtered=books.filter(b=>{
     if(catF!=='all'&&b.category!==catF)return false;
     if(q){const ql=q.toLowerCase();return b.title.toLowerCase().includes(ql)||(b.author||'').toLowerCase().includes(ql)||(b.isbn||'').includes(ql);}
     return true;
   });
+
+  const totalPages=Math.ceil(filtered.length/perPage);
+  const pageBooks=filtered.slice(page*perPage,(page+1)*perPage);
   const avail=books.filter(b=>!loanMap[b.id]).length;
+
+  // Book of the month
+  const botm=window._botm||(books.length?books[0]:null);
+  const botmReviews=botm?getBookReviews(botm.id):[];
+  const botmAvg=botm?getAvgRating(botm.id):0;
+
   el.innerHTML=`
-  <div style="background:linear-gradient(135deg,var(--navy) 0%,#2d5a72 100%);color:#fff;border-radius:var(--radius);padding:28px 24px;margin-bottom:24px;position:relative;overflow:hidden">
+  <!-- Hero banner -->
+  <div style="background:linear-gradient(135deg,var(--navy) 0%,#2d5a72 100%);color:#fff;border-radius:var(--radius);padding:24px 20px;margin-bottom:20px;position:relative;overflow:hidden">
     <div style="position:absolute;right:-20px;bottom:-30px;font-size:120px;opacity:.06">☬</div>
-    <div style="font-size:22px;font-weight:700;margin-bottom:6px">Sangat Library</div>
-    <div style="font-size:14px;opacity:.85;margin-bottom:16px">Sikh Spiritual Centre Toronto — Community Library</div>
-    <div style="display:flex;gap:16px;flex-wrap:wrap">
-      <div style="background:rgba(255,255,255,.15);border-radius:8px;padding:10px 16px;text-align:center"><div style="font-size:24px;font-weight:700">${books.length}</div><div style="font-size:12px;opacity:.85">Total books</div></div>
-      <div style="background:rgba(255,255,255,.15);border-radius:8px;padding:10px 16px;text-align:center"><div style="font-size:24px;font-weight:700;color:#90ee90">${avail}</div><div style="font-size:12px;opacity:.85">Available now</div></div>
-      <div style="background:rgba(255,255,255,.15);border-radius:8px;padding:10px 16px;text-align:center"><div style="font-size:24px;font-weight:700">${books.filter(b=>loanMap[b.id]).length}</div><div style="font-size:12px;opacity:.85">On loan</div></div>
+    <div style="font-size:20px;font-weight:700;margin-bottom:4px">Sangat Library</div>
+    <div style="font-size:13px;opacity:.8;margin-bottom:16px">Sikh Spiritual Centre Toronto</div>
+    <div style="display:flex;gap:12px;flex-wrap:wrap">
+      <div style="background:rgba(255,255,255,.15);border-radius:8px;padding:8px 14px;text-align:center"><div style="font-size:22px;font-weight:700">${books.length}</div><div style="font-size:11px;opacity:.85">Total books</div></div>
+      <div style="background:rgba(255,255,255,.15);border-radius:8px;padding:8px 14px;text-align:center"><div style="font-size:22px;font-weight:700;color:#90ee90">${avail}</div><div style="font-size:11px;opacity:.85">Available</div></div>
+      <div style="background:rgba(255,255,255,.15);border-radius:8px;padding:8px 14px;text-align:center"><div style="font-size:22px;font-weight:700">${books.filter(b=>loanMap[b.id]).length}</div><div style="font-size:11px;opacity:.85">On loan</div></div>
     </div>
   </div>
 
-  <div style="display:flex;gap:8px;margin-bottom:14px;flex-wrap:wrap">
-    <input type="text" id="pub-search" placeholder="Search by title, author or ISBN…" value="${q}" oninput="renderPublic()" style="flex:1;min-width:200px">
-    <select id="pub-cat-filter" onchange="renderPublic()" style="min-width:160px">
+  <!-- Book of the month -->
+  ${botm?`<div style="background:var(--gold-lt);border:1.5px solid var(--gold-mid);border-radius:var(--radius);padding:18px 20px;margin-bottom:20px">
+    <div style="font-size:11px;font-weight:700;color:var(--gold-dark);text-transform:uppercase;letter-spacing:.1em;margin-bottom:10px">☆ Book of the Month</div>
+    <div style="display:flex;gap:14px;align-items:flex-start">
+      ${botm.coverImage?`<img src="${botm.coverImage}" style="width:60px;height:80px;object-fit:cover;border-radius:6px;flex-shrink:0;box-shadow:0 2px 8px rgba(0,0,0,.2)">`:`<div style="width:60px;height:80px;background:var(--tan);border-radius:6px;flex-shrink:0;display:flex;align-items:center;justify-content:center;font-size:28px">📖</div>`}
+      <div style="flex:1;min-width:0">
+        <div style="font-size:17px;font-weight:700;font-family:'Noto Sans Gurmukhi','Noto Sans Devanagari',sans-serif;margin-bottom:4px">${escH(botm.title)}</div>
+        <div style="font-size:13px;color:var(--muted);margin-bottom:6px">${escH(botm.author||'')}</div>
+        ${botmAvg>0?`<div style="display:flex;align-items:center;gap:6px;margin-bottom:8px">${[1,2,3,4,5].map(n=>`<span style="color:${n<=Math.round(botmAvg)?'#D2994B':'#ddd'};font-size:16px">★</span>`).join('')}<span style="font-size:12px;color:var(--muted)">${botmAvg.toFixed(1)} (${botmReviews.length} review${botmReviews.length!==1?'s':''})</span></div>`:''}
+        <div style="display:flex;gap:8px;flex-wrap:wrap">
+          <span class="badge ${loanMap[botm.id]?'b-out':'b-in'}">${loanMap[botm.id]?'On loan':'Available'}</span>
+          <button onclick="showReviewPanel('${botm.id}')" style="font-size:11px;padding:4px 12px;border-radius:20px;border:1px solid var(--gold-mid);background:#fff;color:var(--gold-dark);cursor:pointer;font-family:inherit">Read reviews & rate</button>
+        </div>
+      </div>
+    </div>
+  </div>`:''}
+
+  <!-- Member lookup -->
+  <div style="background:#fff;border:1.5px solid var(--border);border-radius:var(--radius);padding:16px 18px;margin-bottom:20px">
+    <div style="font-size:14px;font-weight:600;color:var(--navy);margin-bottom:10px">🔍 Check your borrowed books</div>
+    <div style="display:flex;gap:8px;flex-wrap:wrap">
+      <input type="text" id="member-lookup" placeholder="Enter your member ID (MBR-0001) or email…" style="flex:1;min-width:200px">
+      <button class="btn btn-primary" onclick="lookupMember()">Check</button>
+    </div>
+    <div id="member-result" style="margin-top:10px"></div>
+  </div>
+
+  <!-- Search & filter -->
+  <div style="display:flex;gap:8px;margin-bottom:12px;flex-wrap:wrap">
+    <input type="text" id="pub-search" placeholder="Search by title, author or ISBN…" value="${q}" oninput="window._pubPage=0;renderPublic()" style="flex:1;min-width:200px">
+    <select id="pub-cat-filter" onchange="window._pubPage=0;renderPublic()" style="min-width:160px">
       <option value="all">All categories</option>
       ${CATS.map(c=>`<option value="${c.id}"${catF===c.id?' selected':''}>${c.label}</option>`).join('')}
     </select>
   </div>
 
-  <div style="font-size:13px;color:var(--muted);margin-bottom:12px">${filtered.length} book${filtered.length!==1?'s':''} found</div>
+  <div style="font-size:13px;color:var(--muted);margin-bottom:12px">${filtered.length} book${filtered.length!==1?'s':''} found${filtered.length>perPage?` — showing ${page*perPage+1}–${Math.min((page+1)*perPage,filtered.length)}`:''}</div>
 
-  <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(280px,1fr));gap:12px;margin-bottom:28px">
-    ${filtered.map(b=>{
+  <!-- Book grid -->
+  <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(260px,1fr));gap:12px;margin-bottom:16px">
+    ${pageBooks.map(b=>{
       const onLoan=!!loanMap[b.id];
+      const avg=getAvgRating(b.id);
+      const revCount=getBookReviews(b.id).length;
       return`<div style="background:#fff;border:1.5px solid ${onLoan?'var(--border)':'var(--gold-mid)'};border-radius:var(--radius);padding:14px 16px;display:flex;gap:12px;align-items:flex-start">
         ${b.coverImage?`<img src="${b.coverImage}" style="width:48px;height:64px;object-fit:cover;border-radius:6px;flex-shrink:0;border:1px solid var(--border)">`:`<div style="width:48px;height:64px;background:var(--tan-lt);border-radius:6px;flex-shrink:0;display:flex;align-items:center;justify-content:center;font-size:22px">📖</div>`}
         <div style="flex:1;min-width:0">
-          <div style="font-size:14px;font-weight:600;font-family:'Noto Sans Gurmukhi','Noto Sans Devanagari',sans-serif;line-height:1.3;margin-bottom:4px">${escH(b.title)}${b.volumeNum?` <span style="font-size:11px;color:var(--muted)">Vol ${b.volumeNum}</span>`:''}</div>
+          <div style="font-size:14px;font-weight:600;font-family:'Noto Sans Gurmukhi','Noto Sans Devanagari',sans-serif;line-height:1.3;margin-bottom:3px">${escH(b.title)}${b.volumeNum?` <span style="font-size:11px;color:var(--muted)">Vol ${b.volumeNum}</span>`:''}</div>
           <div style="font-size:12px;color:var(--muted);margin-bottom:6px">${escH(b.author||'—')}</div>
-          <div style="display:flex;gap:5px;flex-wrap:wrap;align-items:center">
+          <div style="display:flex;gap:5px;flex-wrap:wrap;align-items:center;margin-bottom:6px">
             <span class="badge ${onLoan?'b-out':'b-in'}">${onLoan?'On loan':'Available'}</span>
             <span class="badge b-lang">${b.language}</span>
             ${isScrip(b.category)?`<span class="badge b-gold">☬</span>`:''}
           </div>
-          ${(()=>{const avg=getAvgRating(b.id);const cnt=getBookReviews(b.id).length;return avg>0?`<div style="margin-top:6px;display:flex;align-items:center;gap:4px">${[1,2,3,4,5].map(n=>`<span style="color:${n<=Math.round(avg)?'#D2994B':'#ddd'};font-size:12px">★</span>`).join('')}<span style="font-size:11px;color:var(--muted)">(${cnt})</span></div>`:''})()}
-          <button onclick="showReviewPanel('${b.id}')" style="margin-top:8px;font-size:11px;padding:4px 10px;border-radius:20px;border:1px solid var(--gold-mid);background:var(--gold-lt);color:var(--gold-dark);cursor:pointer;font-family:inherit">${getBookReviews(b.id).length?'Reviews & ratings':'Write a review'}</button>
+          ${avg>0?`<div style="display:flex;align-items:center;gap:3px;margin-bottom:4px">${[1,2,3,4,5].map(n=>`<span style="color:${n<=Math.round(avg)?'#D2994B':'#ddd'};font-size:12px">★</span>`).join('')}<span style="font-size:11px;color:var(--muted)">(${revCount})</span></div>`:''}
+          <button onclick="showReviewPanel('${b.id}')" style="font-size:11px;padding:3px 10px;border-radius:20px;border:1px solid var(--gold-mid);background:var(--gold-lt);color:var(--gold-dark);cursor:pointer;font-family:inherit">${revCount?'Reviews':'Write review'}</button>
         </div>
       </div>`;
-    }).join('')||'<div class="empty" style="grid-column:1/-1;padding:60px">No books found</div>'}
+    }).join('')||'<div class="empty" style="grid-column:1/-1;padding:60px;text-align:center">No books found</div>'}
   </div>
 
-  <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-bottom:20px" class="pub-action-grid">
+  <!-- Pagination -->
+  ${totalPages>1?`<div style="display:flex;gap:8px;justify-content:center;margin-bottom:24px;flex-wrap:wrap">
+    ${page>0?`<button class="btn btn-sm" onclick="window._pubPage=${page-1};renderPublic()">← Previous</button>`:''}
+    <span style="font-size:13px;color:var(--muted);padding:8px 12px">Page ${page+1} of ${totalPages}</span>
+    ${page<totalPages-1?`<button class="btn btn-sm" onclick="window._pubPage=${page+1};renderPublic()">Next →</button>`:''}
+  </div>`:''}
+
+  <!-- Action cards -->
+  <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:16px;margin-bottom:20px" class="pub-action-grid">
+
     <div style="background:var(--gold-lt);border:1.5px solid var(--gold-mid);border-radius:var(--radius);padding:20px 18px">
-      <div style="font-size:16px;font-weight:700;color:var(--navy);margin-bottom:6px">📚 Request a book</div>
-      <div style="font-size:13px;color:var(--muted);margin-bottom:14px;line-height:1.6">Can't find what you're looking for? Suggest a book for the library to purchase.</div>
+      <div style="font-size:15px;font-weight:700;color:var(--navy);margin-bottom:6px">📚 Request a book</div>
+      <div style="font-size:12px;color:var(--muted);margin-bottom:12px;line-height:1.6">Can't find what you're looking for? Suggest a book for us to purchase.</div>
       <input type="text" id="req-title" placeholder="Book title *" style="margin-bottom:8px">
       <input type="text" id="req-author" placeholder="Author (optional)" style="margin-bottom:8px">
-      <input type="text" id="req-name" placeholder="Your name (optional)" style="margin-bottom:10px">
+      <input type="text" id="req-name" placeholder="Your name (optional)" style="margin-bottom:8px">
+      <input type="email" id="req-email" placeholder="Your email (optional)" style="margin-bottom:10px">
       <button class="btn btn-primary" style="width:100%" onclick="submitBookRequest()">Submit request</button>
-      <div id="req-msg" style="font-size:12px;margin-top:8px;color:#2a7a42"></div>
+      <div id="req-msg" style="font-size:12px;margin-top:8px"></div>
     </div>
+
     <div style="background:var(--sky-lt);border:1.5px solid var(--sky);border-radius:var(--radius);padding:20px 18px">
-      <div style="font-size:16px;font-weight:700;color:var(--navy);margin-bottom:6px">🎁 Support our library</div>
-      <div style="font-size:13px;color:var(--muted);margin-bottom:14px;line-height:1.6">Want to contribute to the Sangat Library? You can donate books by bringing them to the Gurdwara front desk, or support us through Seva.</div>
-      <div style="background:#fff;border-radius:8px;padding:12px 14px;margin-bottom:10px;font-size:13px;color:var(--navy);font-weight:500">📍 Drop off books at the Gurdwara front desk<br>and let a volunteer know it's for the library.</div>
-      <div style="font-size:12px;color:var(--muted);line-height:1.6">Books in any condition considered. Sikh literature, educational books, children's books especially welcome.</div>
+      <div style="font-size:15px;font-weight:700;color:var(--navy);margin-bottom:6px">📬 Stay connected</div>
+      <div style="font-size:12px;color:var(--muted);margin-bottom:12px;line-height:1.6">Get updates about new books and library events.</div>
+      <input type="text" id="sub-name" placeholder="Your name *" style="margin-bottom:8px">
+      <input type="email" id="sub-email" placeholder="Your email *" style="margin-bottom:10px">
+      <button class="btn" style="width:100%;border-color:var(--navy);color:var(--navy)" onclick="submitEmail()">Subscribe</button>
+      <div id="sub-msg" style="font-size:12px;margin-top:8px"></div>
+      <div style="font-size:11px;color:var(--muted);margin-top:6px">No spam, ever.</div>
     </div>
+
+    <div style="background:linear-gradient(135deg,var(--navy) 0%,#2d5a72 100%);border-radius:var(--radius);padding:20px 18px;color:#fff;position:relative;overflow:hidden">
+      <div style="position:absolute;right:-10px;bottom:-20px;font-size:80px;opacity:.08">☬</div>
+      <div style="font-size:15px;font-weight:700;margin-bottom:6px">🙏 Support our library</div>
+      <div style="font-size:12px;opacity:.85;margin-bottom:12px;line-height:1.6">Your seva helps us grow our collection and serve the Sangat. Donate books or give financially.</div>
+      <a href="https://ssctoronto.org/donate" target="_blank" rel="noopener" style="display:block;background:var(--gold);color:#fff;text-align:center;padding:10px;border-radius:8px;font-weight:700;font-size:13px;text-decoration:none;margin-bottom:8px">💛 Donate at ssctoronto.org</a>
+      <div style="font-size:11px;opacity:.7;text-align:center">Or drop off books at the Gurdwara front desk</div>
+    </div>
+
   </div>`;
 }
+
+function setBookOfMonth(){
+  const sel=document.getElementById('botm-select');
+  if(!sel||!sel.value)return;
+  const b=bookById(sel.value);
+  if(!b)return;
+  window._botm=b;
+  localStorage.setItem('gw_botm',sel.value);
+  renderAdmin();
+  alert('✓ "'+b.title+'" set as Book of the Month');
+}
+
+function loadBotm(){
+  const id=localStorage.getItem('gw_botm');
+  if(id){const b=bookById(id);if(b)window._botm=b;}
+}
+
+function lookupMember(){
+  const q=document.getElementById('member-lookup').value.trim().toUpperCase();
+  const resultEl=document.getElementById('member-result');
+  if(!q){if(resultEl)resultEl.innerHTML='<div style="font-size:13px;color:#b63a3a">Please enter your member ID or email.</div>';return;}
+  // Find borrower by ID or email
+  const b=borrowers.find(br=>br.id===q||(br.email&&br.email.toUpperCase()===q)||(br.name&&br.name.toUpperCase()===q));
+  if(!b){if(resultEl)resultEl.innerHTML='<div style="font-size:13px;color:#b63a3a">Member not found. Please check your ID or contact the library desk.</div>';return;}
+  const myLoans=activeLoans().filter(l=>l.borrowerId===b.id);
+  const overdueLoans=myLoans.filter(isOverdue);
+  if(!myLoans.length){
+    if(resultEl)resultEl.innerHTML=`<div style="background:#e6f4ea;border-radius:8px;padding:12px 14px"><div style="font-size:14px;font-weight:600;color:#2a7a42">✓ ${escH(b.name)} — No books currently borrowed.</div></div>`;
+    return;
+  }
+  const rows=myLoans.map(l=>{const bk=bookById(l.bookId);const over=isOverdue(l);return`<div style="display:flex;justify-content:space-between;align-items:center;padding:8px 0;border-bottom:1px solid var(--border);font-size:13px"><div><div style="font-weight:500">${bk?escH(bk.title):l.bookId}</div><div style="color:var(--muted)">Due: ${fmtDate(l.dueDate)}</div></div><span class="badge ${over?'b-out':'b-warn'}">${over?'⚠ Overdue':'On loan'}</span></div>`}).join('');
+  if(resultEl)resultEl.innerHTML=`<div style="background:${overdueLoans.length?'#fdecea':'var(--sky-lt)'};border-radius:8px;padding:12px 14px"><div style="font-size:14px;font-weight:600;color:var(--navy);margin-bottom:8px">${escH(b.name)} — ${myLoans.length} book${myLoans.length!==1?'s':''} borrowed${overdueLoans.length?` (${overdueLoans.length} overdue)`:''}</div>${rows}</div>`;
+}
+
 
 function submitBookRequest(){
   const title=document.getElementById('req-title').value.trim();
   const author=document.getElementById('req-author').value.trim();
   const name=document.getElementById('req-name').value.trim();
+  const email=document.getElementById('req-email')?document.getElementById('req-email').value.trim():'';
   const msgEl=document.getElementById('req-msg');
-  if(!title){if(msgEl)msgEl.textContent='Please enter a book title.';return;}
-  // Save to wishlist
-  wishlist.unshift({id:'WL-'+Date.now(),title,author,cat:'',lang:'',price:0,source:'Public request',notes:'Requested by: '+(name||'Anonymous'),addedDate:new Date().toISOString().split('T')[0],acquired:false});
+  if(!title){if(msgEl){msgEl.textContent='Please enter a book title.';msgEl.style.color='#b63a3a';}return;}
+  const notes='Requested by: '+(name||'Anonymous')+(email?' ('+email+')':'');
+  wishlist.unshift({id:'WL-'+Date.now(),title,author,cat:'',lang:'',price:0,source:'Public request',notes,addedDate:new Date().toISOString().split('T')[0],acquired:false});
   saveWishlist();
   if(msgEl){msgEl.textContent='✓ Thank you! Your request has been added to our wish list.';msgEl.style.color='#2a7a42';}
-  document.getElementById('req-title').value='';
-  document.getElementById('req-author').value='';
-  document.getElementById('req-name').value='';
+  ['req-title','req-author','req-name','req-email'].forEach(id=>{const el=document.getElementById(id);if(el)el.value='';});
+}
+
+function submitEmail(){
+  const name=document.getElementById('sub-name').value.trim();
+  const email=document.getElementById('sub-email').value.trim();
+  const msgEl=document.getElementById('sub-msg');
+  if(!name||!email){if(msgEl){msgEl.textContent='Please enter your name and email.';msgEl.style.color='#b63a3a';}return;}
+  if(!/^[^@]+@[^@]+\.[^@]+$/.test(email)){if(msgEl){msgEl.textContent='Please enter a valid email address.';msgEl.style.color='#b63a3a';}return;}
+  // Save subscriber locally and to Firebase
+  const subscribers=JSON.parse(localStorage.getItem('gw_subscribers')||'[]');
+  if(subscribers.find(s=>s.email===email)){if(msgEl){msgEl.textContent='✓ You are already subscribed!';msgEl.style.color='#2a7a42';}return;}
+  subscribers.push({name,email,date:new Date().toISOString().split('T')[0]});
+  localStorage.setItem('gw_subscribers',JSON.stringify(subscribers));
+  fbSave('subscribers',subscribers).catch(()=>{});
+  if(msgEl){msgEl.textContent='✓ Thank you '+name+'! We will keep you updated.';msgEl.style.color='#2a7a42';}
+  document.getElementById('sub-name').value='';
+  document.getElementById('sub-email').value='';
 }
 
 function submitDonation(){
@@ -2150,11 +2298,18 @@ function deleteReview(reviewId,bookId){
 }
 function closeReviewModal(){document.getElementById('review-modal').style.display='none';}
 
+
+function saveWishlist(){ try{localStorage.setItem('gw_wishlist',JSON.stringify(wishlist));}catch(e){} wishlist.forEach(w=>fbSave('wishlist',[w]).catch(()=>{})); }
+function loadWishlist(){ try{const w=localStorage.getItem('gw_wishlist');if(w)wishlist=JSON.parse(w);}catch(e){} }
+function saveSaleItems(){ try{localStorage.setItem('gw_sale',JSON.stringify(saleItems));}catch(e){} }
+function loadSaleItems(){ try{const s=localStorage.getItem('gw_sale');if(s)saleItems=JSON.parse(s);}catch(e){} }
+
 /* ══ INIT ══ */
 load();
 loadWishlist();
 loadSaleItems();
 loadReviews();
+loadBotm();
 checkSavedAuth();
 renderPublic();
 showTab('public');
