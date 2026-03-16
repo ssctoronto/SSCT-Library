@@ -1882,6 +1882,28 @@ function escH(s){return String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;')
 
 /* ══ FIREBASE SYNC ══ */
 
+async function fbSyncPush(){
+  const btn=document.getElementById('sync-btn');
+  if(btn){btn.textContent='☁ Syncing…';btn.disabled=true;}
+  setSyncStatus('Pushing to shared database…',null);
+  try{
+    const [r1,r2,r3]=await Promise.all([
+      fbSave('books',books),
+      fbSave('loans',loans),
+      fbSave('borrowers',borrowers)
+    ]);
+    if(r1&&r2&&r3){
+      setSyncStatus('✓ Pushed '+books.length+' books, '+loans.length+' loans, '+borrowers.length+' borrowers',true);
+    }else{
+      setSyncStatus('⚠ Some items may not have synced — check your internet connection',false);
+    }
+  }catch(e){
+    setSyncStatus('❌ Push failed: '+e.message,false);
+    console.error('Push error:',e);
+  }
+  if(btn){btn.textContent='☁ Push to database';btn.disabled=false;}
+}
+
 async function fbSyncPull(manual){
   const btn=document.getElementById('pull-btn');
   if(btn&&manual){btn.textContent='↓ Loading…';btn.disabled=true;}
