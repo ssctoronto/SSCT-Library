@@ -639,6 +639,31 @@ async function fbSave(collection, dataArray) {
   }
 }
 
+async function fbSyncPush(){
+  const btn=document.getElementById('sync-btn');
+  if(btn){btn.textContent='☁ Syncing…';btn.disabled=true;}
+  setSyncStatus('Pushing to shared database…',null);
+  try{
+    // Try a test GET first to check connectivity and permissions
+    const testR=await fetch(`${FB_BASE}/books`);
+    if(testR.status===403){
+      setSyncStatus('❌ Permission denied — go to Firebase → Firestore → Rules and make sure allow read, write: if true is published',false);
+      if(btn){btn.textContent='☁ Push to database';btn.disabled=false;}
+      return;
+    }
+    const [r1,r2,r3]=await Promise.all([fbSave('books',books),fbSave('loans',loans),fbSave('borrowers',borrowers)]);
+    if(r1&&r2&&r3){
+      setSyncStatus('✓ Pushed '+books.length+' books, '+borrowers.length+' borrowers to shared database',true);
+    }else{
+      setSyncStatus('⚠ Partial save — some data may not have synced. Check Firebase rules.',false);
+    }
+  }catch(e){
+    setSyncStatus('❌ Cannot reach database: '+e.message,false);
+    console.error('Push error:',e);
+  }
+  if(btn){btn.textContent='☁ Push to database';btn.disabled=false;}
+}
+
 async function fbLoad(collection) {
   try {
     const r = await fetch(`${FB_BASE}/${collection}`);
@@ -1870,16 +1895,7 @@ document.addEventListener('click',e=>{const menu=document.getElementById('mobile
 function escH(s){return String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');}
 
 /* ══ FIREBASE SYNC ══ */
-async function fbSyncPush(){
-  const btn=document.getElementById('sync-btn');
-  if(btn){btn.textContent='☁ Syncing…';btn.disabled=true;}
-  setSyncStatus('Pushing to shared database…',null);
-  try{
-    await Promise.all([fbSave('books',books),fbSave('loans',loans),fbSave('borrowers',borrowers)]);
-    setSyncStatus('✓ Pushed '+books.length+' books to shared database',true);
-  }catch(e){setSyncStatus('Sync failed: '+e.message,false);}
-  if(btn){btn.textContent='☁ Sync to shared database';btn.disabled=false;}
-}
+
 async function fbSyncPull(manual){
   const btn=document.getElementById('pull-btn');
   if(btn&&manual){btn.textContent='↓ Loading…';btn.disabled=true;}
