@@ -846,33 +846,51 @@ function addBookAsCopy(){const title=document.getElementById('f-title').value.tr
 function autoGuessCategory(){
   const title=document.getElementById('f-title').value.trim();
   const authors=getAuthors().join(', ');
-  if(!title) return;
-  // Auto-guess category
+  if(!title){alert('Please enter a title first.');return;}
+  const t=title.toLowerCase(), a=authors.toLowerCase();
+  let detected=[];
+
+  // Guess category - always override
   const catSel=document.getElementById('f-cat');
-  if(catSel&&!catSel.value){
+  if(catSel){
     const guessed=guessCategoryFromBook(title,authors,[]);
     if(guessed){
       catSel.value=guessed;
       catSel.style.borderColor='var(--gold)';catSel.style.background='var(--gold-lt)';
-      setTimeout(()=>{catSel.style.borderColor='';catSel.style.background='';},2000);
+      setTimeout(()=>{catSel.style.borderColor='';catSel.style.background='';},2500);
+      detected.push('Category: '+catInfo(guessed).label);
+    } else {
+      detected.push('Category: could not detect — please select manually');
     }
   }
-  // Auto-guess language
+
+  // Guess language - always override
   const langSel=document.getElementById('f-lang');
-  if(langSel&&!langSel.value){
-    const t=title.toLowerCase(),a=authors.toLowerCase();
+  if(langSel){
     let lang='';
     if(/[\u0A00-\u0A7F]/.test(title)) lang='Punjabi (Gurmukhi)';
     else if(/[\u0600-\u06FF]/.test(title)) lang='Punjabi (Shahmukhi)';
     else if(/[\u0900-\u097F]/.test(title)) lang='Hindi';
-    else if(/sahib|gurbani|shabad|kirtan|paath|japji|nitnem|gutka|granth|ik onkar/.test(t)) lang='Punjabi (Gurmukhi)';
-    else if(/singh|kaur|punjab|sikh|khalsa|gurdwara/.test(t+' '+a)&&!/english|canada|toronto/.test(t)) lang='';
-    else lang='English';
+    else if(/sahib|gurbani|shabad|kirtan|paath|japji|nitnem|gutka|granth|ik onkar|waheguru/.test(t)) lang='Punjabi (Gurmukhi)';
+    else if(/farsi|persian|farsee/.test(t)) lang='Farsi / Persian';
+    else if(/sanskrit|sanscrit/.test(t)) lang='Sanskrit';
+    else if(/urdu/.test(t)) lang='Urdu';
+    else if(/hindi|devanagari/.test(t)) lang='Hindi';
+    else lang='English'; // default to English for Roman script titles
     if(lang){
       langSel.value=lang;
       langSel.style.borderColor='var(--gold)';langSel.style.background='var(--gold-lt)';
-      setTimeout(()=>{langSel.style.borderColor='';langSel.style.background='';},2000);
+      setTimeout(()=>{langSel.style.borderColor='';langSel.style.background='';},2500);
+      detected.push('Language: '+lang);
     }
+  }
+
+  // Show what was detected
+  const msgEl=document.getElementById('autodetect-msg');
+  if(msgEl){
+    msgEl.textContent='✓ Detected — '+detected.join(' | ')+' (adjust if wrong)';
+    msgEl.style.display='block';
+    setTimeout(()=>msgEl.style.display='none',4000);
   }
 }
 
@@ -952,6 +970,10 @@ function renderAddBook(){
         <div><label>Volume number</label><input type="number" id="f-vol-num" placeholder="e.g. 1" min="1" max="99"><div style="font-size:11px;color:var(--muted);margin-top:4px">Leave blank if not part of a set</div></div>
         <div><label>Total volumes in set</label><input type="number" id="f-vol-total" placeholder="e.g. 4" min="1" max="99"></div>
       </div>
+    </div>
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:6px;flex-wrap:wrap;gap:6px">
+      <div id="autodetect-msg" style="font-size:12px;color:#2a7a42;display:none"></div>
+      <button type="button" class="btn btn-sm" onclick="autoGuessCategory()" style="color:var(--gold-dark);border-color:var(--gold);background:var(--gold-lt);font-size:12px;margin-left:auto">✨ Auto-detect category &amp; language</button>
     </div>
     <div class="form-row">
       <div><label>Category *</label><select id="f-cat"><option value="">— Select category —</option>${['Sikh Scriptures','Sikh Studies','Literature','General','Children & Youth','Other'].map(g=>`<optgroup label="— ${g} —">${CATS.filter(c=>c.g===g).map(c=>`<option value="${c.id}">${c.label}</option>`).join('')}</optgroup>`).join('')}</select></div>
