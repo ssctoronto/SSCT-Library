@@ -833,11 +833,49 @@ function exportCSV(type){
 /* ══ DUPLICATE DETECTION ══ */
 function fuzzyMatch(a,b){const norm=s=>s.toLowerCase().replace(/[^a-z0-9\u0A00-\u0A7F\u0900-\u097F]/g,' ').replace(/\s+/g,' ').trim();const na=norm(a),nb=norm(b);if(na===nb)return 1.0;if(na.includes(nb)||nb.includes(na))return 0.9;const bigrams=s=>{const bg=new Set();for(let i=0;i<s.length-1;i++)bg.add(s[i]+s[i+1]);return bg;};const ba=bigrams(na),bb=bigrams(nb);let intersect=0;ba.forEach(b=>{if(bb.has(b))intersect++;});return(2*intersect)/(ba.size+bb.size);}
 function findDuplicates(title){if(!title||title.length<3)return[];return books.filter(b=>fuzzyMatch(b.title,title)>=0.75);}
-function checkDuplicateAndAdd(){const title=document.getElementById('f-title').value.trim();if(!title){addMsg={ok:false,text:'Title is required.'};renderAddBook();return;}const dupes=findDuplicates(title);if(dupes.length>0){showDuplicateWarning(title,dupes);}else{addBook();}}
+function checkDuplicateAndAdd(){const title=document.getElementById('f-title').value.trim();if(!title){addMsg={ok:false,text:'Title is required.'};renderAddBook();return;}
+  const cat=document.getElementById('f-cat').value;
+  if(!cat){addMsg={ok:false,text:'Please select a category.'};renderAddBook();return;}
+  const lang=document.getElementById('f-lang').value;
+  if(!lang){addMsg={ok:false,text:'Please select a language.'};renderAddBook();return;}const dupes=findDuplicates(title);if(dupes.length>0){showDuplicateWarning(title,dupes);}else{addBook();}}
 function showDuplicateWarning(title,dupes){const el=document.getElementById('pg-addbook');const dupeList=dupes.slice(0,5).map(b=>`<div style="display:flex;align-items:center;gap:10px;padding:10px 0;border-bottom:1px solid var(--border)">${b.coverImage?`<img src="${b.coverImage}" style="width:36px;height:46px;object-fit:cover;border-radius:4px;flex-shrink:0">`:'<div style="width:36px;height:46px;background:var(--tan-lt);border-radius:4px;flex-shrink:0"></div>'}<div style="flex:1;min-width:0"><div style="font-size:13px;font-weight:500;font-family:\'Noto Sans Gurmukhi\',\'Noto Sans Devanagari\',sans-serif">${escH(b.title)}</div><div style="font-size:12px;color:var(--muted)">${b.id} &bull; ${catInfo(b.category).label} &bull; ${b.language}${b.location?` &bull; <span style="font-weight:600;color:var(--navy)">${b.location}</span>`:''}</div>${b.volumeNum?`<div style="font-size:11px;color:var(--muted)">Vol ${b.volumeNum}${b.volumeTotal?' of '+b.volumeTotal:''}</div>`:''}</div></div>`).join('');const warningHTML=`<div id="dup-warning" style="background:#fff8e1;border:2px solid var(--gold);border-radius:var(--radius);padding:18px 20px;margin-bottom:18px"><div style="font-size:15px;font-weight:700;color:var(--navy);margin-bottom:6px">⚠ Possible duplicate found</div><div style="font-size:13px;color:var(--muted);margin-bottom:10px;line-height:1.6">We found ${dupes.length} book${dupes.length>1?'s':''} with a similar title already in the catalogue.</div><div style="background:#fdecea;border-radius:8px;padding:10px 14px;margin-bottom:14px;font-size:13px;color:#b63a3a;font-weight:500;line-height:1.6">If you are holding a physical book — it is a real copy and should be added. <strong>Do NOT go back and delete the existing entry</strong> — that represents another physical book.</div><div style="background:#fff;border-radius:8px;padding:0 12px;margin-bottom:16px">${dupeList}</div><div style="display:flex;gap:8px;flex-wrap:wrap"><button class="btn btn-primary" onclick="addBookAsCopy()" style="flex:1;min-width:160px">➕ Yes — I have a physical copy, add it</button><button class="btn" onclick="addBook()" style="flex:1;min-width:160px;border-color:var(--navy);color:var(--navy)">📖 Different book — add anyway</button><button class="btn" onclick="document.getElementById('dup-warning').remove()" style="flex:1;min-width:80px">Go back</button></div></div>`;const existing=document.getElementById('dup-warning');if(existing)existing.remove();el.insertAdjacentHTML('afterbegin',warningHTML);el.scrollIntoView({behavior:'smooth',block:'start'});}
 function addBookAsCopy(){const title=document.getElementById('f-title').value.trim();const dupes=findDuplicates(title);if(dupes.length>0){const best=dupes[0];document.getElementById('f-title').value=best.title;document.getElementById('f-pub').value=best.publisher||'';document.getElementById('f-year').value=best.year||'';document.getElementById('f-isbn').value=best.isbn||'';document.getElementById('f-cat').value=best.category||'gutka';document.getElementById('f-lang').value=best.language||'Punjabi (Gurmukhi)';document.getElementById('f-cond').value=best.condition||'Good';document.getElementById('f-notes').value=best.notes||'';resetAuthorFields();if(best.author){const al=best.author.split(', ');const inputs=document.querySelectorAll('.author-input');if(inputs[0])inputs[0].value=al[0]||'';al.slice(1).forEach(name=>{addAuthorField();const all=document.querySelectorAll('.author-input');if(all[all.length-1])all[all.length-1].value=name;});}if(best.location&&best.location.length>=2){const lc=document.getElementById('f-loc-case');const ls=document.getElementById('f-loc-shelf');if(lc)lc.value=best.location[0];if(ls)ls.value=best.location.slice(1);updateLocPreview();}const existing=document.getElementById('dup-warning');if(existing)existing.remove();document.getElementById('pg-addbook').insertAdjacentHTML('afterbegin','<div class="msg-ok">Details copied from existing copy. Adjust if needed and click Add to catalogue.</div>');}else{addBook();}}
 
 /* ══ LOOKUP TAB SWITCHER ══ */
+
+function autoGuessCategory(){
+  const title=document.getElementById('f-title').value.trim();
+  const authors=getAuthors().join(', ');
+  if(!title) return;
+  // Auto-guess category
+  const catSel=document.getElementById('f-cat');
+  if(catSel&&!catSel.value){
+    const guessed=guessCategoryFromBook(title,authors,[]);
+    if(guessed){
+      catSel.value=guessed;
+      catSel.style.borderColor='var(--gold)';catSel.style.background='var(--gold-lt)';
+      setTimeout(()=>{catSel.style.borderColor='';catSel.style.background='';},2000);
+    }
+  }
+  // Auto-guess language
+  const langSel=document.getElementById('f-lang');
+  if(langSel&&!langSel.value){
+    const t=title.toLowerCase(),a=authors.toLowerCase();
+    let lang='';
+    if(/[\u0A00-\u0A7F]/.test(title)) lang='Punjabi (Gurmukhi)';
+    else if(/[\u0600-\u06FF]/.test(title)) lang='Punjabi (Shahmukhi)';
+    else if(/[\u0900-\u097F]/.test(title)) lang='Hindi';
+    else if(/sahib|gurbani|shabad|kirtan|paath|japji|nitnem|gutka|granth|ik onkar/.test(t)) lang='Punjabi (Gurmukhi)';
+    else if(/singh|kaur|punjab|sikh|khalsa|gurdwara/.test(t+' '+a)&&!/english|canada|toronto/.test(t)) lang='';
+    else lang='English';
+    if(lang){
+      langSel.value=lang;
+      langSel.style.borderColor='var(--gold)';langSel.style.background='var(--gold-lt)';
+      setTimeout(()=>{langSel.style.borderColor='';langSel.style.background='';},2000);
+    }
+  }
+}
+
 function switchLookupTab(tab){document.getElementById('lookup-panel-isbn').style.display=tab==='isbn'?'block':'none';document.getElementById('lookup-panel-title').style.display=tab==='title'?'block':'none';const isbnBtn=document.getElementById('lookup-tab-isbn');const titleBtn=document.getElementById('lookup-tab-title');if(isbnBtn){isbnBtn.className=tab==='isbn'?'btn btn-sm btn-primary':'btn btn-sm';isbnBtn.style.borderRadius='20px';}if(titleBtn){titleBtn.className=tab==='title'?'btn btn-sm btn-primary':'btn btn-sm';titleBtn.style.borderRadius='20px';}}
 
 /* ══ SMART CATEGORY GUESSER ══ */
@@ -882,7 +920,7 @@ function renderAddBook(){
     <div class="fsec">Book details</div>
     <div class="form-full">
       <label>Title * <span style="color:var(--muted);font-weight:400;font-size:11px">— as written on the book</span></label>
-      <input type="text" id="f-title" placeholder="Title in any language">
+      <input type="text" id="f-title" placeholder="Title in any language" onblur="autoGuessCategory()">
       <div class="field-tools">
         <button class="kbd-lang-btn" onclick="openKbd('f-title')" style="font-size:12px;padding:4px 10px;border:1px solid var(--gold-mid);background:var(--gold-lt);color:var(--gold-dark);border-radius:6px;cursor:pointer">ਗੁ / ह keyboard</button>
         <button class="translate-btn" onclick="translateField('f-title','en','pa')">EN → ਪੰਜਾਬੀ</button>
@@ -916,8 +954,8 @@ function renderAddBook(){
       </div>
     </div>
     <div class="form-row">
-      <div><label>Category *</label><select id="f-cat">${['Sikh Scriptures','Sikh Studies','Literature','General','Children & Youth','Other'].map(g=>`<optgroup label="— ${g} —">${CATS.filter(c=>c.g===g).map(c=>`<option value="${c.id}">${c.label}</option>`).join('')}</optgroup>`).join('')}</select></div>
-      <div><label>Language *</label><select id="f-lang">${LANGS.map(l=>`<option>${l}</option>`).join('')}</select></div>
+      <div><label>Category *</label><select id="f-cat"><option value="">— Select category —</option>${['Sikh Scriptures','Sikh Studies','Literature','General','Children & Youth','Other'].map(g=>`<optgroup label="— ${g} —">${CATS.filter(c=>c.g===g).map(c=>`<option value="${c.id}">${c.label}</option>`).join('')}</optgroup>`).join('')}</select></div>
+      <div><label>Language *</label><select id="f-lang"><option value="">— Select language —</option>${LANGS.map(l=>`<option>${l}</option>`).join('')}</select></div>
     </div>
     <div class="form-row"><div><label>Condition</label><select id="f-cond"><option>New</option><option selected>Good</option><option>Fair</option><option>Worn</option></select></div><div><label>Notes</label><input type="text" id="f-notes" placeholder="Optional notes"></div></div>
     <div class="form-full">
@@ -974,6 +1012,9 @@ function addBook(){
   const title=document.getElementById('f-title').value.trim();
   const cat=document.getElementById('f-cat').value;
   if(!title){addMsg={ok:false,text:'Title is required.'};renderAddBook();return;}
+  if(!cat){addMsg={ok:false,text:'Please select a category.'};renderAddBook();return;}
+  const lang=document.getElementById('f-lang').value;
+  if(!lang){addMsg={ok:false,text:'Please select a language.'};renderAddBook();return;}
   const copies=Math.max(1,parseInt(document.getElementById('f-copies').value)||1);
   const volNum=parseInt(document.getElementById('f-vol-num').value)||null;
   const volTotal=parseInt(document.getElementById('f-vol-total').value)||null;
