@@ -1,0 +1,1824 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Gurdwara Lending Library — Sikh Spiritual Centre Toronto</title>
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Outfit:wght@400;500;600;700&family=Noto+Serif:ital@0;1&family=Noto+Sans+Gurmukhi&family=Noto+Sans+Devanagari&display=swap');
+
+/* ── TOKENS ─────────────────────────────────────────────────────── */
+:root{
+  --gold:#D2994B; --gold-dark:#a8722e; --gold-lt:#fdf8f0; --gold-mid:#f5e6cc;
+  --navy:#4F6275; --navy-dark:#374655; --navy-lt:#eef3f7;
+  --tan:#BFA88E; --tan-lt:#f7f2ec;
+  --sky:#C5D6E1; --sky-lt:#f0f5f8;
+  --rose:#B68C8C; --rose-lt:#f7f0f0;
+  --bg:#f5f2ed;
+  --surface:#ffffff;
+  --border:#e8e2d9;
+  --text:#1c1a17;
+  --muted:#7a7268;
+  --radius:12px; --radius-sm:8px; --radius-xs:6px;
+  --shadow:0 2px 12px rgba(79,98,117,.10);
+  --shadow-lg:0 8px 32px rgba(79,98,117,.14);
+}
+
+/* ── RESET ───────────────────────────────────────────────────────── */
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:'Outfit',sans-serif;font-size:15px;color:var(--text);background:var(--bg);min-height:100vh}
+
+/* ── LAYOUT ──────────────────────────────────────────────────────── */
+.app{max-width:980px;margin:0 auto;padding:0 16px 60px}
+
+/* ── HEADER ──────────────────────────────────────────────────────── */
+.header{
+  background:var(--surface);
+  border-bottom:3px solid var(--gold);
+  padding:0 16px;
+  margin:0 -16px 24px;
+  position:sticky;top:0;z-index:100;
+  box-shadow:0 4px 20px rgba(79,98,117,.12);
+}
+.header-inner{max-width:980px;margin:0 auto;display:flex;align-items:center;gap:14px;height:68px}
+.logo{width:52px;height:52px;border-radius:50%;background:var(--gold-lt);border:2px solid var(--gold-mid);display:flex;align-items:center;justify-content:center;flex-shrink:0;overflow:hidden;box-shadow:0 2px 8px rgba(210,153,75,.2)}
+.logo img{width:100%;height:100%;object-fit:contain;padding:4px}
+.header-text{flex:1}
+.header-title{font-size:18px;font-weight:700;color:var(--navy);letter-spacing:-.01em;line-height:1}
+.header-sub{font-size:12px;color:var(--muted);margin-top:3px;font-weight:400;letter-spacing:.02em}
+.header-right{margin-left:auto;display:flex;align-items:center;gap:10px}
+
+/* ── NAV ─────────────────────────────────────────────────────────── */
+nav{
+  display:flex;flex-wrap:wrap;gap:3px;
+  background:var(--surface);
+  border-radius:var(--radius);
+  padding:6px;
+  margin-bottom:24px;
+  box-shadow:var(--shadow);
+  border:1px solid var(--border);
+}
+.tab{
+  padding:8px 16px;font-size:13px;font-weight:500;
+  border:none;background:none;cursor:pointer;
+  color:var(--muted);border-radius:var(--radius-sm);
+  transition:all .18s;white-space:nowrap;letter-spacing:.01em;
+}
+.tab:hover{background:var(--tan-lt);color:var(--navy)}
+.tab.active{background:var(--navy);color:#fff;box-shadow:0 2px 8px rgba(79,98,117,.25)}
+.tab-overdue{color:#b63a3a!important;font-weight:600!important}
+.tab-overdue.active{background:#c62828!important;color:#fff!important}
+
+/* ── PAGE ────────────────────────────────────────────────────────── */
+.page{display:none}
+.page.active{display:block}
+
+/* ── STAT CARDS ──────────────────────────────────────────────────── */
+.stats-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:14px;margin-bottom:24px}
+.stat{
+  background:var(--surface);border-radius:var(--radius);
+  padding:20px 18px;
+  box-shadow:var(--shadow);
+  border:1px solid var(--border);
+  border-top:3px solid var(--gold);
+  position:relative;overflow:hidden;
+}
+.stat::after{
+  content:'';position:absolute;bottom:-12px;right:-12px;
+  width:60px;height:60px;border-radius:50%;
+  background:var(--gold-lt);opacity:.6;
+}
+.stat-n{font-size:32px;font-weight:700;margin-bottom:4px;letter-spacing:-.02em;position:relative;z-index:1}
+.stat-l{font-size:12px;color:var(--muted);font-weight:500;text-transform:uppercase;letter-spacing:.06em;position:relative;z-index:1}
+
+/* ── CARDS ───────────────────────────────────────────────────────── */
+.card{
+  background:var(--surface);border-radius:var(--radius);
+  padding:20px 22px;margin-bottom:14px;
+  box-shadow:var(--shadow);border:1px solid var(--border);
+}
+.section-title{
+  font-size:11px;font-weight:700;color:var(--navy);
+  text-transform:uppercase;letter-spacing:.1em;
+  margin-bottom:14px;
+}
+
+/* ── BOOK ROWS ───────────────────────────────────────────────────── */
+.book-row{display:flex;align-items:center;gap:12px;padding:12px 0;border-bottom:1px solid var(--border)}
+.book-row:last-child{border-bottom:none;padding-bottom:0}
+.book-row:first-child{padding-top:0}
+.book-id{
+  font-size:11px;font-family:'Outfit',monospace;
+  background:var(--navy);color:#fff;
+  padding:3px 9px;border-radius:20px;
+  white-space:nowrap;flex-shrink:0;font-weight:600;
+  letter-spacing:.04em;
+}
+.book-info{flex:1;min-width:0}
+.book-title{font-size:14px;font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;color:var(--text)}
+.book-meta{font-size:12px;color:var(--muted);margin-top:3px}
+
+/* ── BADGES ──────────────────────────────────────────────────────── */
+.badge{display:inline-block;font-size:11px;padding:2px 9px;border-radius:20px;font-weight:600;letter-spacing:.02em}
+.b-gold{background:var(--gold-mid);color:#7a4f10}
+.b-out{background:#fdecea;color:#b63a3a}
+.b-in{background:#e6f4ea;color:#2a7a42}
+.b-lang{background:var(--sky-lt);color:var(--navy);border:1px solid var(--sky)}
+.b-warn{background:#fff8e1;color:#b36000}
+
+/* ── BUTTONS ─────────────────────────────────────────────────────── */
+.btn{
+  padding:9px 18px;border-radius:var(--radius-sm);
+  border:1.5px solid var(--border);background:var(--surface);
+  cursor:pointer;font-size:13px;color:var(--text);
+  font-weight:600;font-family:'Outfit',sans-serif;
+  transition:all .15s;letter-spacing:.01em;
+  min-height:38px;touch-action:manipulation;
+}
+.btn:hover{background:var(--tan-lt);border-color:var(--tan);transform:translateY(-1px);box-shadow:0 3px 10px rgba(0,0,0,.08)}
+.btn:active{transform:translateY(0)}
+.btn:disabled{opacity:.45;cursor:not-allowed;transform:none}
+.btn-primary{background:var(--gold);border-color:var(--gold);color:#fff;box-shadow:0 2px 8px rgba(210,153,75,.3)}
+.btn-primary:hover{background:var(--gold-dark);border-color:var(--gold-dark);box-shadow:0 4px 14px rgba(210,153,75,.4)}
+.btn-green{background:#2e7d32;border-color:#2e7d32;color:#fff;box-shadow:0 2px 8px rgba(46,125,50,.25)}
+.btn-green:hover{background:#1b5e20;border-color:#1b5e20}
+.btn-sm{padding:6px 13px;font-size:12px;border-radius:var(--radius-xs);min-height:32px}
+.btn-danger{color:#b63a3a;border-color:#f5c6cb}
+.btn-danger:hover{background:#fdecea;border-color:#f5c6cb}
+
+/* ── FORMS ───────────────────────────────────────────────────────── */
+.form-row{display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-bottom:14px}
+.form-row3{display:grid;grid-template-columns:1fr 1fr 1fr;gap:14px;margin-bottom:14px}
+.form-full{margin-bottom:14px}
+label{display:block;font-size:12px;color:var(--navy);margin-bottom:5px;font-weight:600;letter-spacing:.02em}
+input,select,textarea{
+  width:100%;padding:10px 13px;
+  border:1.5px solid var(--border);
+  border-radius:var(--radius-sm);
+  background:var(--surface);color:var(--text);
+  font-size:14px;font-family:'Outfit',sans-serif;
+  transition:border-color .15s, box-shadow .15s;
+}
+input:focus,select:focus,textarea:focus{
+  outline:none;border-color:var(--gold);
+  box-shadow:0 0 0 3px rgba(210,153,75,.15);
+}
+input::placeholder{color:#bbb}
+
+/* ── MESSAGES ────────────────────────────────────────────────────── */
+.msg-ok{background:#e6f4ea;color:#2a7a42;padding:12px 16px;border-radius:var(--radius-sm);font-size:13px;margin-bottom:14px;border:1px solid #b7dfc0;font-weight:500}
+.msg-err{background:#fdecea;color:#b63a3a;padding:12px 16px;border-radius:var(--radius-sm);font-size:13px;margin-bottom:14px;border:1px solid #f5c6cb;font-weight:500}
+.msg-info{background:var(--sky-lt);color:var(--navy);padding:12px 16px;border-radius:var(--radius-sm);font-size:13px;margin-bottom:14px;border:1px solid var(--sky);font-weight:500}
+.msg-warn{background:#fff8e1;color:#b36000;padding:12px 16px;border-radius:var(--radius-sm);font-size:13px;margin-bottom:14px;border:1px solid #ffe0b2;font-weight:500}
+
+/* ── LOAN ROWS ───────────────────────────────────────────────────── */
+.loan-row{display:flex;align-items:flex-start;gap:12px;padding:13px 0;border-bottom:1px solid var(--border)}
+.loan-row:last-child{border-bottom:none}
+
+/* ── LAYOUT HELPERS ──────────────────────────────────────────────── */
+.two-col{display:grid;grid-template-columns:1fr 1fr;gap:20px}
+.action-row{display:flex;gap:8px;justify-content:flex-end;margin-top:16px}
+.divider{height:1px;background:var(--border);margin:18px 0}
+.fsec{
+  font-size:11px;font-weight:700;color:var(--navy);
+  text-transform:uppercase;letter-spacing:.1em;
+  margin:18px 0 12px;
+  padding-bottom:8px;
+  border-bottom:2px solid var(--gold-mid);
+  display:inline-block;
+}
+.empty{text-align:center;padding:40px;color:var(--muted);font-size:14px}
+.overdue-text{color:#b63a3a;font-weight:600}
+
+/* ── ISBN / SCAN ROW ─────────────────────────────────────────────── */
+.isbn-row{display:flex;gap:8px;align-items:flex-end}
+.isbn-row input{flex:1}
+.lookup-box{
+  background:var(--gold-lt);border:1.5px solid var(--gold-mid);
+  border-radius:var(--radius-sm);padding:14px 16px;margin-bottom:14px;font-size:13px;
+}
+
+/* ── FILTER CHIPS ────────────────────────────────────────────────── */
+.filters{display:flex;gap:6px;flex-wrap:wrap;margin-bottom:16px}
+.chip{
+  padding:5px 14px;border-radius:20px;
+  border:1.5px solid var(--border);background:var(--surface);
+  cursor:pointer;font-size:12px;color:var(--muted);
+  font-weight:500;font-family:'Outfit',sans-serif;
+  transition:all .15s;
+}
+.chip:hover{border-color:var(--gold);color:var(--gold-dark)}
+.chip.active{background:var(--navy);color:#fff;border-color:var(--navy);box-shadow:0 2px 6px rgba(79,98,117,.2)}
+
+/* ── SUGGEST ─────────────────────────────────────────────────────── */
+.suggest-box{position:relative}
+.suggest-list{
+  position:absolute;top:calc(100% + 6px);left:0;right:0;
+  background:var(--surface);border:1.5px solid var(--border);
+  border-radius:var(--radius-sm);z-index:50;
+  max-height:200px;overflow-y:auto;
+  box-shadow:var(--shadow-lg);display:none;
+}
+.suggest-item{padding:10px 14px;cursor:pointer;font-size:13px;border-bottom:1px solid var(--border)}
+.suggest-item:last-child{border-bottom:none}
+.suggest-item:hover{background:var(--tan-lt)}
+
+/* ── BORROWER ROWS ───────────────────────────────────────────────── */
+.mbr-row{display:flex;align-items:center;gap:12px;padding:11px 0;border-bottom:1px solid var(--border)}
+.mbr-row:last-child{border-bottom:none;padding-bottom:0}
+.mbr-avatar{
+  width:38px;height:38px;border-radius:50%;
+  background:var(--navy);
+  display:flex;align-items:center;justify-content:center;
+  font-size:13px;font-weight:700;color:#fff;flex-shrink:0;
+  box-shadow:0 2px 6px rgba(79,98,117,.2);
+}
+
+/* ── LABELS ──────────────────────────────────────────────────────── */
+.label-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:12px;margin-bottom:16px}
+.label-card{
+  border:2px solid var(--border);border-radius:var(--radius-sm);
+  padding:12px 14px;background:var(--surface);cursor:pointer;
+  position:relative;transition:all .15s;
+}
+.label-card:hover{border-color:var(--gold);transform:translateY(-2px);box-shadow:var(--shadow)}
+.label-card.selected{border-color:var(--gold);background:var(--gold-lt);box-shadow:0 0 0 3px rgba(210,153,75,.15)}
+.label-card .lc-id{font-family:'Outfit',monospace;font-size:14px;font-weight:700;color:var(--navy);margin-bottom:4px}
+.label-card .lc-title{font-size:12px;color:var(--text);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;margin-bottom:3px}
+.label-card .lc-meta{font-size:11px;color:var(--muted)}
+.label-card .lc-org{font-size:10px;color:#bbb;margin-top:6px;border-top:1px solid var(--border);padding-top:5px}
+.label-card .sel-check{position:absolute;top:8px;right:10px;font-size:14px;color:var(--gold)}
+
+/* ── SPINE LABEL ─────────────────────────────────────────────────── */
+.spine-label{
+  display:inline-flex;width:32px;
+  background:var(--navy);border-radius:4px;
+  padding:6px 3px;align-items:center;justify-content:center;
+  flex-shrink:0;margin-right:10px;
+}
+.spine-label .s-id{font-size:9px;font-weight:700;writing-mode:vertical-rl;color:#fff;letter-spacing:1.5px}
+
+/* ── LIBRARY CARD ────────────────────────────────────────────────── */
+.lcard-wrap{cursor:pointer;padding:4px;border-radius:16px;border:2px solid transparent;transition:border-color .15s}
+.lcard-wrap:hover{border-color:var(--gold-mid)}
+.lcard-wrap.selected{border-color:var(--gold)}
+.lcard-preview{
+  width:100%;height:190px;border-radius:14px;
+  padding:18px 20px;position:relative;overflow:hidden;
+  background:linear-gradient(135deg,var(--navy-dark) 0%,var(--navy) 50%,#6b8296 100%);
+  color:#fff;
+}
+.lcard-preview::before{
+  content:'';position:absolute;top:-30px;right:-30px;
+  width:120px;height:120px;border-radius:50%;
+  background:rgba(210,153,75,.15);
+}
+.card-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:18px;margin-bottom:16px}
+
+/* ── STEP ROWS ───────────────────────────────────────────────────── */
+.step-row{display:flex;align-items:flex-start;gap:14px;margin-bottom:18px}
+.step-num{
+  width:28px;height:28px;border-radius:50%;
+  background:var(--gold);color:#fff;
+  font-size:12px;font-weight:700;
+  display:flex;align-items:center;justify-content:center;
+  flex-shrink:0;margin-top:1px;
+  box-shadow:0 2px 6px rgba(210,153,75,.3);
+}
+.step-title{font-size:14px;font-weight:600;margin-bottom:4px;color:var(--navy)}
+.step-body{font-size:13px;color:var(--muted);line-height:1.65}
+pre.code-block{
+  background:var(--tan-lt);border:1px solid var(--tan);
+  border-radius:var(--radius-sm);padding:14px 16px;
+  font-family:'Courier New',monospace;font-size:11px;
+  line-height:1.7;overflow-x:auto;white-space:pre;color:var(--text);position:relative;
+}
+.sync-status-row{
+  display:flex;align-items:center;gap:12px;
+  padding:14px 16px;border-radius:var(--radius-sm);
+  border:1.5px solid var(--border);margin-bottom:14px;
+  font-size:13px;background:var(--surface);
+}
+.sync-dot{width:10px;height:10px;border-radius:50%;flex-shrink:0}
+.dot-green{background:#2a7a42}
+.dot-grey{background:#bbb}
+
+/* ── SCAN BUTTON ─────────────────────────────────────────────────── */
+.scan-btn{
+  display:inline-flex;align-items:center;gap:6px;
+  padding:9px 14px;border-radius:var(--radius-sm);
+  border:1.5px solid var(--gold);background:var(--gold-lt);
+  color:var(--gold-dark);cursor:pointer;font-size:13px;
+  font-weight:600;white-space:nowrap;font-family:'Outfit',sans-serif;
+  transition:all .15s;
+}
+.scan-btn:hover{background:var(--gold-mid);box-shadow:0 2px 8px rgba(210,153,75,.25)}
+
+/* ── COVER IMAGE ─────────────────────────────────────────────────── */
+.cover-upload-area{
+  border:2px dashed var(--tan);border-radius:var(--radius-sm);
+  padding:20px;text-align:center;cursor:pointer;
+  transition:all .15s;background:var(--tan-lt);
+}
+.cover-upload-area:hover{border-color:var(--gold);background:var(--gold-lt)}
+.cover-thumb{width:52px;height:68px;object-fit:cover;border-radius:var(--radius-xs);border:1.5px solid var(--border)}
+
+/* ── TRANSLATE ───────────────────────────────────────────────────── */
+.translate-btn{
+  padding:4px 10px;border-radius:20px;
+  border:1px solid var(--sky);background:var(--sky-lt);
+  color:var(--navy);cursor:pointer;font-size:11px;font-weight:600;
+  white-space:nowrap;transition:all .12s;
+}
+.translate-btn:hover{background:var(--sky);color:var(--navy-dark)}
+.field-tools{display:flex;gap:5px;flex-wrap:wrap;align-items:center;margin-top:6px}
+
+/* ── VIRTUAL KEYBOARD ────────────────────────────────────────────── */
+.kbd-overlay{display:none;position:fixed;inset:0;background:rgba(28,26,23,.6);z-index:8000;align-items:flex-end;justify-content:center;backdrop-filter:blur(3px)}
+.kbd-overlay.open{display:flex}
+.kbd-panel{
+  background:var(--surface);border-radius:20px 20px 0 0;
+  padding:18px;width:min(720px,100vw);max-height:70vh;overflow-y:auto;
+  box-shadow:0 -8px 40px rgba(0,0,0,.2);
+}
+.kbd-header{display:flex;align-items:center;gap:8px;margin-bottom:12px;flex-wrap:wrap}
+.kbd-lang-btn{
+  padding:6px 14px;border-radius:20px;border:1.5px solid var(--border);
+  background:var(--surface);cursor:pointer;font-size:12px;font-weight:600;
+  font-family:'Noto Sans Gurmukhi','Noto Sans Devanagari',sans-serif;
+  transition:all .12s;
+}
+.kbd-lang-btn.active{background:var(--gold);color:#fff;border-color:var(--gold)}
+.kbd-preview{
+  background:var(--tan-lt);border-radius:var(--radius-sm);
+  padding:12px 14px;font-size:20px;min-height:48px;margin-bottom:12px;
+  word-break:break-all;color:var(--text);
+  font-family:'Noto Sans Gurmukhi','Noto Sans Devanagari',sans-serif;line-height:1.6;
+  border:1.5px solid var(--border);
+}
+.kbd-rows{display:flex;flex-direction:column;gap:5px}
+.kbd-row{display:flex;flex-wrap:wrap;gap:4px}
+.kbd-key{
+  padding:8px 10px;border-radius:var(--radius-xs);
+  border:1.5px solid var(--border);background:var(--surface);cursor:pointer;
+  font-size:18px;min-width:38px;text-align:center;line-height:1.2;
+  font-family:'Noto Sans Gurmukhi','Noto Sans Devanagari',sans-serif;
+  transition:all .1s;user-select:none;
+}
+.kbd-key:active{background:var(--gold-lt);border-color:var(--gold);transform:scale(.93)}
+.kbd-key.fn{font-size:12px;min-width:52px;background:var(--tan-lt);font-family:'Outfit',sans-serif}
+.kbd-key.space{min-width:160px;font-size:12px;background:var(--tan-lt);font-family:'Outfit',sans-serif}
+.kbd-sec{font-size:10px;color:var(--muted);width:100%;margin-top:6px;font-weight:700;text-transform:uppercase;letter-spacing:.06em}
+
+/* ── SCANNER ─────────────────────────────────────────────────────── */
+.scanner-overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,.92);z-index:9999;align-items:center;justify-content:center;flex-direction:column}
+.scanner-overlay.open{display:flex}
+.scanner-box{background:#000;border-radius:16px 16px 0 0;overflow:hidden;width:min(400px,100vw)}
+#scanner-reader{width:100%!important;border:none!important;background:#000}
+#scanner-reader video{width:100%!important;object-fit:cover}
+#scanner-reader img{display:none!important}
+#scanner-reader__scan_region{background:transparent!important}
+#scanner-reader__dashboard{display:none!important}
+#scanner-reader__filescan_input{display:none!important}
+.scanner-footer{
+  background:#111;
+  padding:16px 20px;
+  width:min(400px,100vw);
+  border-radius:0 0 16px 16px;
+}
+.scanner-status{font-size:13px;color:#ccc;margin-bottom:8px;text-align:center;font-weight:500}
+.scanner-manual-row{display:flex;gap:8px}
+.scanner-manual-row input{
+  flex:1;background:#222;border:1.5px solid #444;
+  color:#fff;border-radius:var(--radius-sm);
+  padding:9px 12px;font-size:14px;font-family:'Outfit',sans-serif;
+}
+.scanner-manual-row input::placeholder{color:#666}
+.scanner-manual-row input:focus{border-color:var(--gold);outline:none}
+
+/* ── BARCODE ─────────────────────────────────────────────────────── */
+.barcode-wrap{margin:8px 0 4px;text-align:center}
+.barcode-wrap svg{max-width:100%}
+
+/* ── MOBILE NAV ──────────────────────────────────────────────────── */
+.mobile-nav{
+  display:none;position:fixed;bottom:0;left:0;right:0;
+  background:var(--surface);
+  border-top:1px solid var(--border);
+  padding:6px 0 env(safe-area-inset-bottom,0);
+  z-index:200;
+  box-shadow:0 -4px 20px rgba(79,98,117,.10);
+}
+.mobile-nav-items{display:flex;justify-content:space-around;align-items:center}
+.mobile-nav-btn{
+  flex:1;display:flex;flex-direction:column;
+  align-items:center;gap:3px;padding:6px 2px;
+  border:none;background:none;cursor:pointer;
+  color:var(--muted);font-size:10px;font-weight:600;
+  font-family:'Outfit',sans-serif;
+  touch-action:manipulation;min-height:52px;justify-content:center;
+  letter-spacing:.02em;text-transform:uppercase;
+  transition:color .15s;
+}
+.mobile-nav-btn.active{color:var(--navy)}
+.mobile-nav-btn .mn-icon{font-size:20px;line-height:1}
+.mobile-nav-btn .mn-dot{width:5px;height:5px;border-radius:50%;background:#b63a3a;margin-top:1px;display:none}
+.mobile-nav-btn.has-overdue .mn-dot{display:block}
+
+/* ── PRINT ───────────────────────────────────────────────────────── */
+@media print{
+  body{background:#fff}
+  .header,nav,.page:not(.active),.app>*:not(#print-area){display:none!important}
+  #print-area{display:block!important}
+  .print-label{page-break-inside:avoid;border:1px solid #bbb;border-radius:6px;padding:10px 12px;margin:6px;display:inline-block;width:210px;vertical-align:top;font-family:Georgia,serif}
+  .pl-id{font-family:'Courier New',monospace;font-size:16px;font-weight:700;color:#000;margin-bottom:2px}
+  .pl-title{font-size:12px;font-weight:600;color:#000;margin-bottom:2px}
+  .pl-meta{font-size:11px;color:#444;margin-bottom:1px}
+  .pl-org{font-size:10px;color:#777;margin-top:4px;border-top:1px solid #ccc;padding-top:3px}
+  .pl-barcode{margin:6px 0 2px;text-align:center}
+  .pl-barcode svg{max-width:180px}
+  .print-lcard{page-break-inside:avoid;display:inline-block;margin:6px;width:3.375in;height:2.125in;border-radius:10px;padding:14px 16px;background:#4F6275!important;-webkit-print-color-adjust:exact;print-color-adjust:exact;position:relative;vertical-align:top;overflow:hidden}
+  .print-lcard *{color:#fff!important}
+}
+
+/* ── RESPONSIVE ──────────────────────────────────────────────────── */
+@media(max-width:700px){
+  .app{padding:0 10px 100px}
+  .header{padding:0 12px;margin:0 -10px 16px}
+  .header-inner{height:60px;gap:10px}
+  .logo{width:44px;height:44px}
+  .header-title{font-size:15px}
+  .header-sub{font-size:11px}
+  nav{flex-wrap:nowrap;overflow-x:auto;overflow-y:hidden;border-radius:10px;padding:4px;gap:1px;-webkit-overflow-scrolling:touch;scrollbar-width:none}
+  nav::-webkit-scrollbar{display:none}
+  .tab{padding:8px 12px;font-size:12px;flex-shrink:0}
+  .stats-grid{grid-template-columns:1fr 1fr;gap:10px;margin-bottom:16px}
+  .stat{padding:14px 14px}
+  .stat-n{font-size:24px}
+  .form-row,.form-row3,.two-col,.card-grid{grid-template-columns:1fr}
+  .label-grid{grid-template-columns:1fr 1fr}
+  .card{padding:14px 14px;margin-bottom:10px}
+  .book-row{flex-wrap:wrap;gap:8px;padding:10px 0}
+  .cover-thumb{width:40px;height:52px}
+  .isbn-row{flex-direction:column;gap:8px}
+  .isbn-row .scan-btn,.isbn-row .btn{width:100%}
+  .scan-row-mobile{flex-direction:column!important}
+  .scan-row-mobile input{width:100%}
+  .scan-row-mobile .scan-btn{width:100%}
+  .action-row{flex-direction:column-reverse;gap:6px}
+  .action-row .btn,.action-row .btn-primary{width:100%}
+  .od-grid{grid-template-columns:1fr 90px 60px!important}
+  .od-col-book,.od-col-id{display:none}
+  .label-grid{grid-template-columns:1fr}
+  .lcard-preview{max-width:100%}
+  .kbd-panel{padding:12px}
+  .kbd-key{padding:7px 8px;min-width:34px;font-size:17px}
+  .kbd-key.space{min-width:100px}
+  .scanner-box{width:100vw;border-radius:0}
+  .scanner-footer{width:100vw;border-radius:0}
+  .how-it-works-grid{grid-template-columns:1fr!important}
+  .mobile-nav{display:block}
+  nav{display:none}
+}
+@media(max-width:700px){
+  input,select,textarea{font-size:16px}
+}
+</style>
+<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+Gurmukhi&family=Noto+Sans+Devanagari&display=swap" rel="stylesheet">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jsbarcode/3.11.5/JsBarcode.all.min.js"></script>
+<script src="https://unpkg.com/html5-qrcode@2.3.8/html5-qrcode.min.js"></script>
+</head>
+<body>
+<!-- Scanner overlay -->
+<div class="scanner-overlay" id="scanner-overlay">
+  <div class="scanner-box">
+    <div id="scanner-reader" style="width:100%;background:#000"></div>
+  </div>
+  <div class="scanner-footer">
+    <div class="scanner-status" id="scanner-status">Starting camera…</div>
+    <div style="font-size:11px;color:#555;text-align:center;margin-bottom:10px">Hold steady &bull; Good light &bull; Barcode in frame</div>
+    <div class="scanner-manual-row">
+      <input type="text" id="scanner-manual-input" placeholder="Or type / paste value here…" onkeydown="if(event.key==='Enter')scannerManualSubmit()">
+      <button class="btn btn-primary btn-sm" onclick="scannerManualSubmit()">Use</button>
+      <button class="btn btn-sm" style="background:#333;color:#fff;border-color:#555" onclick="closeScanner(null)">Cancel</button>
+    </div>
+  </div>
+</div>
+<!-- Virtual keyboard overlay -->
+<div class="kbd-overlay" id="kbd-overlay" onclick="if(event.target===this)closeKbd(false)">
+  <div class="kbd-panel">
+    <div class="kbd-header">
+      <div class="kbd-title">Script keyboard</div>
+      <button class="kbd-lang-btn active" id="kbdlang-gu" onclick="switchKbdLang('gu')">ਪੰਜਾਬੀ Punjabi</button>
+      <button class="kbd-lang-btn" id="kbdlang-hi" onclick="switchKbdLang('hi')">हिंदी Hindi</button>
+      <button class="btn btn-sm btn-primary" onclick="closeKbd(true)" style="margin-left:auto">Done ✓</button>
+      <button class="btn btn-sm" onclick="closeKbd(false)">Cancel</button>
+    </div>
+    <div class="kbd-preview" id="kbd-preview">Start typing…</div>
+    <div id="kbd-keys"></div>
+  </div>
+</div>
+  <div class="header-inner">
+    <div class="logo"><img src="data:image/png;base64,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" alt="SSC Logo"></div>
+    <div class="header-text">
+      <div class="header-title">Gurdwara Lending Library</div>
+      <div class="header-sub">Sikh Spiritual Centre Toronto</div>
+    </div>
+    <div class="header-right">
+    </div>
+  </div>
+</div>
+
+
+<!-- Mobile bottom nav -->
+<div class="mobile-nav" id="mobile-nav">
+  <div class="mobile-nav-items">
+    <button class="mobile-nav-btn active" id="mn-dashboard" onclick="showTab('dashboard')">
+      <span class="mn-icon">🏠</span><span>Home</span>
+    </button>
+    <button class="mobile-nav-btn" id="mn-catalog" onclick="showTab('catalog')">
+      <span class="mn-icon">📚</span><span>Catalogue</span>
+    </button>
+    <button class="mobile-nav-btn" id="mn-addbook" onclick="showTab('addbook')">
+      <span class="mn-icon">➕</span><span>Add Book</span>
+    </button>
+    <button class="mobile-nav-btn" id="mn-checkout" onclick="showTab('checkout')">
+      <span class="mn-icon">🔄</span><span>Check Out</span>
+    </button>
+    <button class="mobile-nav-btn" id="mn-more" onclick="toggleMobileMore()">
+      <span class="mn-icon">☰</span><span>More</span>
+    </button>
+  </div>
+</div>
+
+<!-- Mobile more menu -->
+<div id="mobile-more-menu" style="display:none;position:fixed;bottom:65px;left:0;right:0;background:#fff;border-top:1px solid #e0ddd5;z-index:199;box-shadow:0 -4px 20px rgba(0,0,0,.12);padding:10px">
+  <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:8px">
+    <button onclick="showTabClose('borrowers')" style="display:flex;flex-direction:column;align-items:center;gap:4px;padding:12px 8px;border:1px solid #e0ddd5;border-radius:10px;background:#f3f1ec;cursor:pointer;font-size:12px;font-weight:500;color:#333;touch-action:manipulation">
+      <span style="font-size:22px">👥</span>Borrowers
+    </button>
+    <button onclick="showTabClose('lending')" style="display:flex;flex-direction:column;align-items:center;gap:4px;padding:12px 8px;border:1px solid #e0ddd5;border-radius:10px;background:#f3f1ec;cursor:pointer;font-size:12px;font-weight:500;color:#333;touch-action:manipulation">
+      <span style="font-size:22px">📋</span>Lending
+    </button>
+    <button id="mn-overdues-more" onclick="showTabClose('overdues')" style="display:flex;flex-direction:column;align-items:center;gap:4px;padding:12px 8px;border:1px solid #ffcdd2;border-radius:10px;background:#fdecea;cursor:pointer;font-size:12px;font-weight:600;color:#c62828;touch-action:manipulation">
+      <span style="font-size:22px">⚠️</span><span id="mn-overdue-label">Overdues</span>
+    </button>
+    <button onclick="showTabClose('labels')" style="display:flex;flex-direction:column;align-items:center;gap:4px;padding:12px 8px;border:1px solid #e0ddd5;border-radius:10px;background:#f3f1ec;cursor:pointer;font-size:12px;font-weight:500;color:#333;touch-action:manipulation">
+      <span style="font-size:22px">🏷️</span>Labels
+    </button>
+    <button onclick="showTabClose('libcards')" style="display:flex;flex-direction:column;align-items:center;gap:4px;padding:12px 8px;border:1px solid #e0ddd5;border-radius:10px;background:#f3f1ec;cursor:pointer;font-size:12px;font-weight:500;color:#333;touch-action:manipulation">
+      <span style="font-size:22px">🪪</span>Library Cards
+    </button>
+
+    <button onclick="showTabClose('admin')" style="display:flex;flex-direction:column;align-items:center;gap:4px;padding:12px 8px;border:1px solid #e0ddd5;border-radius:10px;background:#f3f1ec;cursor:pointer;font-size:12px;font-weight:500;color:#333;touch-action:manipulation">
+      <span style="font-size:22px">⚙️</span>Admin
+    </button>
+    <button onclick="showTabClose('wishlist')" style="display:flex;flex-direction:column;align-items:center;gap:4px;padding:12px 8px;border:1px solid #c8e6c9;border-radius:10px;background:#e8f5e9;cursor:pointer;font-size:12px;font-weight:500;color:#2a7a42;touch-action:manipulation">
+      <span style="font-size:22px">🛒</span>Shop
+    </button>
+  </div>
+</div>
+
+<div class="app">
+  <nav id="main-nav">
+    <button class="tab active" onclick="showTab('dashboard')">Dashboard</button>
+    <button class="tab" onclick="showTab('catalog')">Catalogue</button>
+    <button class="tab" onclick="showTab('addbook')">Add Book</button>
+    <button class="tab" onclick="showTab('borrowers')">Borrowers</button>
+    <button class="tab" onclick="showTab('lending')">Lending</button>
+    <button class="tab tab-overdue" onclick="showTab('overdues')" id="tab-overdues">⚠ Overdues</button>
+    <button class="tab" onclick="showTab('checkout')">Check Out / Return</button>
+    <button class="tab" onclick="showTab('labels')">Labels</button>
+    <button class="tab" onclick="showTab('libcards')">Library Cards</button>
+    <button class="tab" onclick="showTab('admin')">⚙ Admin</button>
+    <button class="tab" onclick="showTab('wishlist')" style="color:#2a7a42;font-weight:600">🛒 Wish List &amp; Shop</button>
+  </nav>
+
+  <div id="pg-dashboard" class="page active"></div>
+  <div id="pg-catalog" class="page"></div>
+  <div id="pg-overdues" class="page"></div>
+  <div id="pg-admin" class="page"></div>
+  <div id="pg-wishlist" class="page"></div>
+  <div id="pg-addbook" class="page"></div>
+  <div id="pg-borrowers" class="page"></div>
+  <div id="pg-lending" class="page"></div>
+  <div id="pg-checkout" class="page"></div>
+  <div id="pg-labels" class="page"></div>
+  <div id="pg-libcards" class="page"></div>
+  <div id="print-area" style="display:none"></div>
+</div>
+
+
+<script>
+/* ── FIREBASE REST API (no SDK needed) ── */
+const FB_PROJECT = 'ssct-library';
+const FB_BASE = `https://firestore.googleapis.com/v1/projects/${FB_PROJECT}/databases/(default)/documents/library`;
+
+async function fbSave(collection, dataArray) {
+  try {
+    // Strip cover images — too large for Firestore
+    const toStore = collection === 'books'
+      ? dataArray.map(item => ({...item, coverImage: null}))
+      : dataArray;
+    const body = {
+      fields: {
+        data: { stringValue: JSON.stringify(toStore) },
+        updated: { integerValue: Date.now().toString() }
+      }
+    };
+    const r = await fetch(`${FB_BASE}/${collection}?updateMask.fieldPaths=data&updateMask.fieldPaths=updated`, {
+      method: 'PATCH',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(body)
+    });
+    if (!r.ok) throw new Error('HTTP ' + r.status);
+    return true;
+  } catch(e) {
+    console.warn('Firebase save failed:', e.message);
+    return false;
+  }
+}
+
+async function fbLoad(collection) {
+  try {
+    const r = await fetch(`${FB_BASE}/${collection}`);
+    if (r.status === 404) return null; // doc doesn't exist yet
+    if (!r.ok) throw new Error('HTTP ' + r.status);
+    const doc = await r.json();
+    const dataStr = doc?.fields?.data?.stringValue;
+    if (!dataStr) return null;
+    return JSON.parse(dataStr);
+  } catch(e) {
+    console.warn('Firebase load failed:', e.message);
+    return null;
+  }
+}
+
+/* ── FIREBASE SYNC ── */
+let fbSynced = false;
+
+/* ── COVERS: stored locally only ── */
+function saveCoversLocally() {
+  try {
+    const covers = {};
+    books.forEach(b => { if(b.coverImage) covers[b.id] = b.coverImage; });
+    localStorage.setItem('gw_covers', JSON.stringify(covers));
+  } catch(e) {}
+}
+function loadCoversLocally() {
+  try {
+    const c = localStorage.getItem('gw_covers');
+    if(!c) return;
+    const covers = JSON.parse(c);
+    books.forEach(b => { if(covers[b.id]) b.coverImage = covers[b.id]; });
+  } catch(e) {}
+}
+
+const CATS=[
+  /* ── Sikh Scriptures ── */
+  {id:'sggs',      label:'Sri Guru Granth Sahib Ji',  g:'Sikh Scriptures', short:'SGS'},
+  {id:'dasam',     label:'Dasam Granth',               g:'Sikh Scriptures', short:'DSM'},
+  {id:'sarbloh',   label:'Sarbloh Granth',             g:'Sikh Scriptures', short:'SBL'},
+  {id:'gutka',     label:'Gutka',                      g:'Sikh Scriptures', short:'GTK'},
+  {id:'senchi',    label:'Senchi / Senchian',          g:'Sikh Scriptures', short:'SEN'},
+  {id:'pothi',     label:'Pothi',                      g:'Sikh Scriptures', short:'PTH'},
+  {id:'nitnem',    label:'Nitnem Banis',               g:'Sikh Scriptures', short:'NIT'},
+  {id:'vaaran',    label:'Vaaran — ਵਾਰਾਂ',            g:'Sikh Scriptures', short:'VAR'},
+  {id:'steek',     label:'Steek / Tika — ਸਟੀਕ',       g:'Sikh Scriptures', short:'STK'},
+  {id:'katha',     label:'Katha / Viakhya',            g:'Sikh Scriptures', short:'KTH'},
+  {id:'rehatnama', label:'Rehatnama / Hukamnama',      g:'Sikh Scriptures', short:'RHT'},
+  /* ── Sikh Studies ── */
+  {id:'biography', label:'Biography / Jeevan',         g:'Sikh Studies',    short:'BIO'},
+  {id:'history',   label:'History / Itihas',           g:'Sikh Studies',    short:'HST'},
+  {id:'philosophy',label:'Philosophy / Darshan',       g:'Sikh Studies',    short:'PHL'},
+  {id:'academic',  label:'Academic / Research',        g:'Sikh Studies',    short:'ACD'},
+  {id:'sikhart',   label:'Sikh Art & Architecture',    g:'Sikh Studies',    short:'ART'},
+  /* ── Literature ── */
+  {id:'poetry',    label:'Poetry / Kavita — ਕਵਿਤਾ',   g:'Literature',      short:'POE'},
+  {id:'fiction',   label:'Fiction / Novel',            g:'Literature',      short:'FCT'},
+  {id:'shortstory',label:'Short Stories',              g:'Literature',      short:'SST'},
+  /* ── General ── */
+  {id:'nonfiction',label:'Non-Fiction',                g:'General',         short:'NFC'},
+  {id:'health',    label:'Health & Wellness',          g:'General',         short:'HLT'},
+  {id:'cookbook',  label:'Cookbooks / Langar',         g:'General',         short:'CKB'},
+  {id:'language',  label:'Language Learning',          g:'General',         short:'LNG'},
+  {id:'reference', label:'Reference / Dictionary',     g:'General',         short:'REF'},
+  {id:'magazine',  label:'Magazine / Periodical',      g:'General',         short:'MAG'},
+  /* ── Children & Youth ── */
+  {id:'children',  label:"Children's / Bacche",        g:"Children & Youth",short:'CHD'},
+  {id:'youngadult',label:'Young Adult',                g:"Children & Youth",short:'YAD'},
+  {id:'picturebook',label:'Picture Book',              g:"Children & Youth",short:'PIC'},
+  /* ── Other ── */
+  {id:'other',     label:'Other',                      g:'Other',           short:'OTH'},
+];
+const LANGS=[
+  'Punjabi (Gurmukhi)',
+  'Punjabi (Shahmukhi)',
+  'English',
+  'Hindi',
+  'Sanskrit',
+  'Urdu',
+  'Farsi / Persian',
+  'Braj Bhasha',
+  'French',
+  'Spanish',
+  'Multiple Languages',
+  'Other',
+];
+const SCATS=['sggs','dasam','sarbloh','gutka','senchi','pothi','nitnem','vaaran','steek','katha','rehatnama'];
+const ORG='Sikh Spiritual Centre Toronto';
+const TABS=['dashboard','catalog','addbook','borrowers','lending','overdues','checkout','labels','libcards','admin','wishlist'];
+
+let books=[],loans=[],borrowers=[],selectedLabels=new Set(),selectedCards=new Set();
+let catFilter='all',searchQ='',bSearchQ='';
+let addMsg='',coMsg='',brMsg='',lookupData=null,lookupLoading=false,titleSearchLoading=false;
+
+function catInfo(id){return CATS.find(c=>c.id===id)||{label:id,short:'BK'}}
+function isScrip(cat){return SCATS.includes(cat)}
+function activeLoans(){return loans.filter(l=>!l.returned)}
+function bookById(id){return books.find(b=>b.id===id)}
+function borrowerById(id){return borrowers.find(b=>b.id===id)}
+function isOverdue(l){return new Date(l.dueDate)<new Date()}
+function initials(name){return name.split(' ').map(w=>w[0]||'').join('').toUpperCase().slice(0,2)||'?'}
+function genBookId(cat){const s=catInfo(cat).short;const n=books.filter(b=>b.category===cat).length;return s+'-'+String(n+1).padStart(4,'0')}
+function genMbrId(){return 'MBR-'+String(borrowers.length+1).padStart(4,'0')}
+function fmtDate(d){try{return new Date(d).toLocaleDateString('en-CA',{year:'numeric',month:'short',day:'numeric'});}catch(e){return d||'';}}
+
+function save(){
+  try{
+    localStorage.setItem('gw_books',JSON.stringify(books));
+    localStorage.setItem('gw_loans',JSON.stringify(loans));
+    localStorage.setItem('gw_borrowers',JSON.stringify(borrowers));
+  }catch(e){console.warn('Save failed',e);}
+}
+function load(){
+  try{
+    const b=localStorage.getItem('gw_books');
+    const l=localStorage.getItem('gw_loans');
+    const br=localStorage.getItem('gw_borrowers');
+    if(b)books=JSON.parse(b);
+    if(l)loans=JSON.parse(l);
+    if(br)borrowers=JSON.parse(br);
+  }catch(e){console.warn('Load failed',e);}
+}
+
+
+
+
+
+function showTab(tab){
+  document.querySelectorAll('#main-nav .tab').forEach((t,i)=>t.classList.toggle('active',TABS[i]===tab));
+  updateMobileNav(tab);
+  document.querySelectorAll('.page').forEach(p=>p.classList.remove('active'));
+  const pg=document.getElementById('pg-'+tab);if(pg)pg.classList.add('active');
+  ({dashboard:renderDash,catalog:renderCatalog,addbook:renderAddBook,borrowers:renderBorrowers,lending:renderLending,overdues:renderOverdues,checkout:renderCheckout,labels:renderLabels,libcards:renderLibCards,admin:renderAdmin,wishlist:renderWishlist})[tab]?.();
+}
+
+/* ══ DASHBOARD ══ */
+function renderDash(){
+  const el=document.getElementById('pg-dashboard');
+  const total=books.length,out=activeLoans().length,available=total-out,overdue=activeLoans().filter(isOverdue).length;
+  const catCounts={};books.forEach(b=>{catCounts[b.category]=(catCounts[b.category]||0)+1});
+  const topCats=Object.entries(catCounts).sort((a,b)=>b[1]-a[1]).slice(0,6);
+  const maxCat=topCats.length?topCats[0][1]:1;
+  const recent=loans.slice(-7).reverse();
+  // update overdue tab badge
+  const odBadge=activeLoans().filter(isOverdue).length;
+  const odTabEl=document.getElementById('tab-overdues');
+  if(odTabEl)odTabEl.textContent=odBadge?`⚠ Overdues (${odBadge})`:'⚠ Overdues';
+  el.innerHTML=`
+  <div style="display:flex;gap:8px;margin-bottom:16px;flex-wrap:wrap;align-items:center">
+    <button class="btn btn-sm" onclick="showTab('admin')" style="color:var(--navy);border-color:var(--sky)">⚙ Admin &amp; Export</button>
+    <button class="btn btn-sm" id="sync-btn" onclick="fbSyncPush()" style="color:#2a7a42;border-color:#2a7a42;font-weight:600">☁ Sync to shared database</button>
+    <span id="sync-status" style="font-size:12px;color:var(--muted)"></span>
+  </div>
+  <div class="stats-grid">
+    <div class="stat"><div class="stat-n">${total}</div><div class="stat-l">Total books</div></div>
+    <div class="stat"><div class="stat-n" style="color:#4F6275">${available}</div><div class="stat-l">Available</div></div>
+    <div class="stat"><div class="stat-n" style="color:#2d5a72">${out}</div><div class="stat-l">On loan</div></div>
+    <div class="stat"><div class="stat-n" style="color:#c62828">${overdue}</div><div class="stat-l">Overdue</div></div>
+  </div>
+
+
+  <div class="two-col">
+    <div><div class="section-title">Recent activity</div>
+      <div class="card">${recent.length?recent.map(l=>{const bk=bookById(l.bookId);return`<div class="loan-row"><div style="flex:1"><div style="font-size:14px;font-weight:500">${l.borrowerName}</div><div style="font-size:12px;color:#888">${bk?bk.title:'?'} &bull; ${l.returned?'Returned '+fmtDate(l.returnedDate):'Due '+fmtDate(l.dueDate)}</div></div><span class="badge ${l.returned?'b-in':'b-out'}">${l.returned?'Returned':'Out'}</span></div>`}).join(''):'<div class="empty">No activity yet</div>'}</div>
+    </div>
+    <div><div class="section-title">Collection by category</div>
+      <div class="card">${topCats.length?topCats.map(([cat,n])=>`<div style="display:flex;align-items:center;gap:8px;padding:8px 0;border-bottom:1px solid #ece8e0"><div style="flex:1;font-size:13px">${catInfo(cat).label}</div><div style="font-size:13px;font-weight:600;min-width:24px;text-align:right">${n}</div><div style="width:70px;height:5px;background:#ece8e0;border-radius:3px"><div style="width:${Math.round(n/maxCat*100)}%;height:100%;background:#4F6275;border-radius:3px"></div></div></div>`).join(''):'<div class="empty">No books yet</div>'}</div>
+    </div>
+  </div>`;
+}
+
+function exportAll(){
+  exportCSV('books');
+  setTimeout(()=>exportCSV('loans'),400);
+  setTimeout(()=>exportCSV('borrowers'),800);
+  setTimeout(()=>{
+    renderDash();
+  },1000);
+}
+
+function exportCSV(type){
+  let rows=[],filename='';
+  if(type==='books'){filename='library_books.csv';rows=[['ID','Title','Volume','Volume Total','Location','Author','Publisher','Year','ISBN','Category','Language','Condition','Added Date','Notes']];books.forEach(b=>rows.push([b.id,b.title,b.volumeNum||'',b.volumeTotal||'',b.location||'',b.author||'',b.publisher||'',b.year||'',b.isbn||'',catInfo(b.category).label,b.language,b.condition||'',b.addedDate||'',b.notes||'']));}
+  else if(type==='loans'){filename='library_loans.csv';rows=[['Loan ID','Book ID','Title','Borrower','Email','Phone','Loan Date','Due Date','Returned','Return Date']];loans.forEach(l=>{const bk=bookById(l.bookId);rows.push([l.id,l.bookId,bk?bk.title:'',l.borrowerName,l.email||'',l.phone||'',l.loanDate||'',l.dueDate,l.returned?'Yes':'No',l.returnedDate||'']);});}
+  else{filename='library_borrowers.csv';rows=[['Member ID','Name','Email','Phone','Address','Join Date']];borrowers.forEach(b=>rows.push([b.id,b.name,b.email||'',b.phone||'',b.address||'',b.joinDate||'']));}
+  const csv=rows.map(r=>r.map(c=>'"'+(String(c).replace(/"/g,'""'))+'"').join(',')).join('\n');
+  const blob=new Blob(['\uFEFF'+csv],{type:'text/csv;charset=utf-8'});
+  const url=URL.createObjectURL(blob);const a=document.createElement('a');a.href=url;a.download=filename;a.click();URL.revokeObjectURL(url);
+}
+
+
+/* ══ DUPLICATE DETECTION ══ */
+function fuzzyMatch(a,b){const norm=s=>s.toLowerCase().replace(/[^a-z0-9\u0A00-\u0A7F\u0900-\u097F]/g,' ').replace(/\s+/g,' ').trim();const na=norm(a),nb=norm(b);if(na===nb)return 1.0;if(na.includes(nb)||nb.includes(na))return 0.9;const bigrams=s=>{const bg=new Set();for(let i=0;i<s.length-1;i++)bg.add(s[i]+s[i+1]);return bg;};const ba=bigrams(na),bb=bigrams(nb);let intersect=0;ba.forEach(b=>{if(bb.has(b))intersect++;});return(2*intersect)/(ba.size+bb.size);}
+function findDuplicates(title){if(!title||title.length<3)return[];return books.filter(b=>fuzzyMatch(b.title,title)>=0.75);}
+function checkDuplicateAndAdd(){const title=document.getElementById('f-title').value.trim();if(!title){addMsg={ok:false,text:'Title is required.'};renderAddBook();return;}const dupes=findDuplicates(title);if(dupes.length>0){showDuplicateWarning(title,dupes);}else{addBook();}}
+function showDuplicateWarning(title,dupes){const el=document.getElementById('pg-addbook');const dupeList=dupes.slice(0,5).map(b=>`<div style="display:flex;align-items:center;gap:10px;padding:10px 0;border-bottom:1px solid var(--border)">${b.coverImage?`<img src="${b.coverImage}" style="width:36px;height:46px;object-fit:cover;border-radius:4px;flex-shrink:0">`:'<div style="width:36px;height:46px;background:var(--tan-lt);border-radius:4px;flex-shrink:0"></div>'}<div style="flex:1;min-width:0"><div style="font-size:13px;font-weight:500;font-family:\'Noto Sans Gurmukhi\',\'Noto Sans Devanagari\',sans-serif">${escH(b.title)}</div><div style="font-size:12px;color:var(--muted)">${b.id} &bull; ${catInfo(b.category).label} &bull; ${b.language}${b.location?` &bull; <span style="font-weight:600;color:var(--navy)">${b.location}</span>`:''}</div>${b.volumeNum?`<div style="font-size:11px;color:var(--muted)">Vol ${b.volumeNum}${b.volumeTotal?' of '+b.volumeTotal:''}</div>`:''}</div></div>`).join('');const warningHTML=`<div id="dup-warning" style="background:#fff8e1;border:2px solid var(--gold);border-radius:var(--radius);padding:18px 20px;margin-bottom:18px"><div style="font-size:15px;font-weight:700;color:var(--navy);margin-bottom:6px">⚠ Possible duplicate found</div><div style="font-size:13px;color:var(--muted);margin-bottom:10px;line-height:1.6">We found ${dupes.length} book${dupes.length>1?'s':''} with a similar title already in the catalogue.</div><div style="background:#fdecea;border-radius:8px;padding:10px 14px;margin-bottom:14px;font-size:13px;color:#b63a3a;font-weight:500;line-height:1.6">If you are holding a physical book — it is a real copy and should be added. <strong>Do NOT go back and delete the existing entry</strong> — that represents another physical book.</div><div style="background:#fff;border-radius:8px;padding:0 12px;margin-bottom:16px">${dupeList}</div><div style="display:flex;gap:8px;flex-wrap:wrap"><button class="btn btn-primary" onclick="addBookAsCopy()" style="flex:1;min-width:160px">➕ Yes — I have a physical copy, add it</button><button class="btn" onclick="addBook()" style="flex:1;min-width:160px;border-color:var(--navy);color:var(--navy)">📖 Different book — add anyway</button><button class="btn" onclick="document.getElementById('dup-warning').remove()" style="flex:1;min-width:80px">Go back</button></div></div>`;const existing=document.getElementById('dup-warning');if(existing)existing.remove();el.insertAdjacentHTML('afterbegin',warningHTML);el.scrollIntoView({behavior:'smooth',block:'start'});}
+function addBookAsCopy(){const title=document.getElementById('f-title').value.trim();const dupes=findDuplicates(title);if(dupes.length>0){const best=dupes[0];document.getElementById('f-title').value=best.title;document.getElementById('f-pub').value=best.publisher||'';document.getElementById('f-year').value=best.year||'';document.getElementById('f-isbn').value=best.isbn||'';document.getElementById('f-cat').value=best.category||'gutka';document.getElementById('f-lang').value=best.language||'Punjabi (Gurmukhi)';document.getElementById('f-cond').value=best.condition||'Good';document.getElementById('f-notes').value=best.notes||'';resetAuthorFields();if(best.author){const al=best.author.split(', ');const inputs=document.querySelectorAll('.author-input');if(inputs[0])inputs[0].value=al[0]||'';al.slice(1).forEach(name=>{addAuthorField();const all=document.querySelectorAll('.author-input');if(all[all.length-1])all[all.length-1].value=name;});}if(best.location&&best.location.length>=2){const lc=document.getElementById('f-loc-case');const ls=document.getElementById('f-loc-shelf');if(lc)lc.value=best.location[0];if(ls)ls.value=best.location.slice(1);updateLocPreview();}const existing=document.getElementById('dup-warning');if(existing)existing.remove();document.getElementById('pg-addbook').insertAdjacentHTML('afterbegin','<div class="msg-ok">Details copied from existing copy. Adjust if needed and click Add to catalogue.</div>');}else{addBook();}}
+
+/* ══ LOOKUP TAB SWITCHER ══ */
+function switchLookupTab(tab){document.getElementById('lookup-panel-isbn').style.display=tab==='isbn'?'block':'none';document.getElementById('lookup-panel-title').style.display=tab==='title'?'block':'none';const isbnBtn=document.getElementById('lookup-tab-isbn');const titleBtn=document.getElementById('lookup-tab-title');if(isbnBtn){isbnBtn.className=tab==='isbn'?'btn btn-sm btn-primary':'btn btn-sm';isbnBtn.style.borderRadius='20px';}if(titleBtn){titleBtn.className=tab==='title'?'btn btn-sm btn-primary':'btn btn-sm';titleBtn.style.borderRadius='20px';}}
+
+/* ══ SMART CATEGORY GUESSER ══ */
+function guessCategoryFromBook(title,authors,subjects){const t=(title||'').toLowerCase();const a=(authors||'').toLowerCase();const s=(subjects||[]).join(' ').toLowerCase();const all=t+' '+a+' '+s;if(/siri guru granth|sri guru granth|sggs/.test(all))return'sggs';if(/dasam granth|dasam/.test(t))return'dasam';if(/sarbloh/.test(all))return'sarbloh';if(/nitnem|nit nem/.test(all))return'nitnem';if(/gutka/.test(t))return'gutka';if(/senchi|senchian|senchia/.test(all))return'senchi';if(/pothi/.test(t))return'pothi';if(/vaaran|vaar bhai gurdas|bhai nand lal/.test(all))return'vaaran';if(/steek|tika|teeka|vyakhya|viakhya/.test(all))return'steek';if(/japji|sukhmani|anand sahib|rehras|kirtan sohila|asa di vaar|chaupai/.test(all))return'gutka';if(/katha|kirtan|viakhya/.test(all))return'katha';if(/rehatnama|hukamnama|sikh code of conduct/.test(all))return'rehatnama';if(/sikh art|gurdwara architect|sikh painting/.test(all))return'sikhart';if(/(biography|jeevan|life of|lives of|guru nanak|guru gobind|guru arjan|guru tegh|maharaja ranjit|banda singh|bhagat singh)/.test(all))return'biography';if(/(sikh history|punjab history|itihas|khalsa|sikh war|sikh empire|partition)/.test(all))return'history';if(/(sikh philosoph|sikh theology|gurmat|gurbani|naam|simran|darshan)/.test(all))return'philosophy';if(/(sikh studies|sikhism research|academic|journal|university press)/.test(s+' '+t))return'academic';if(/(poetry|kavita|poems|verse|shayari|nazm)/.test(all))return'poetry';if(/(short stor|kahani|kahaniya)/.test(all))return'shortstory';if(/(novel|fiction|romance|thriller|mystery)/.test(s)||/novel/.test(t))return'fiction';if(/(juvenile|children|picture book|kids|young reader)/.test(s))return'children';if(/(young adult|teen|teenager)/.test(s))return'youngadult';if(/(health|wellness|ayurved|yoga|medicine|diet|nutrition)/.test(all))return'health';if(/(cook|recipe|langar|punjabi food|cuisine)/.test(all))return'cookbook';if(/(learn punjabi|gurmukhi primer|teach yourself|language course|dictionary|grammar)/.test(all))return'language';if(/(dictionary|encyclop|reference|atlas|handbook)/.test(all))return'reference';if(/(magazine|journal|periodical|newsletter)/.test(all))return'magazine';if(s.includes('sikhism')||s.includes('sikh'))return'history';if(s.includes('religion')||s.includes('spirituality'))return'philosophy';if(s.includes('biography')||s.includes('autobiography'))return'biography';if(s.includes('history'))return'history';if(s.includes('poetry'))return'poetry';if(s.includes('fiction'))return'fiction';if(s.includes('juvenile'))return'children';return null;}
+
+/* ══ MULTI-AUTHOR FIELDS ══ */
+function addAuthorField(){const list=document.getElementById('author-list');if(!list)return;const entry=document.createElement('div');entry.className='author-entry';entry.style.cssText='display:flex;gap:6px;align-items:center';entry.innerHTML=`<input type="text" class="author-input" placeholder="Author name" style="flex:1"><button type="button" onclick="removeAuthorField(this)" class="btn btn-sm btn-danger" style="flex-shrink:0;padding:5px 9px">×</button>`;list.appendChild(entry);updateAuthorRemoveBtns();entry.querySelector('input').focus();}
+function removeAuthorField(btn){const entry=btn.closest('.author-entry');if(entry)entry.remove();updateAuthorRemoveBtns();}
+function updateAuthorRemoveBtns(){const entries=document.querySelectorAll('.author-entry');entries.forEach(e=>{const btn=e.querySelector('button');if(btn)btn.style.display=entries.length>1?'':'none';});}
+function getAuthors(){return Array.from(document.querySelectorAll('.author-input')).map(i=>i.value.trim()).filter(v=>v.length>0);}
+function openKbdAuthors(){const inputs=document.querySelectorAll('.author-input');const target=Array.from(inputs).find(i=>i===document.activeElement)||inputs[0];if(target){target.id='_kbd_author_target';openKbd('_kbd_author_target');}}
+function resetAuthorFields(){const list=document.getElementById('author-list');if(!list)return;list.innerHTML=`<div class="author-entry" style="display:flex;gap:6px;align-items:center"><input type="text" class="author-input" placeholder="e.g. Guru Nanak Dev Ji" style="flex:1"><button type="button" onclick="removeAuthorField(this)" class="btn btn-sm btn-danger" style="flex-shrink:0;padding:5px 9px;display:none">×</button></div>`;}
+
+/* ══ ADD BOOK ══ */
+function renderAddBook(){
+  const el=document.getElementById('pg-addbook');
+  el.innerHTML=`${addMsg?`<div class="${addMsg.ok?'msg-ok':'msg-err'}">${addMsg.text}</div>`:''}
+  <div class="card">
+    <div class="fsec">Look up book details</div>
+    <div style="display:flex;gap:6px;margin-bottom:10px">
+      <button id="lookup-tab-isbn" onclick="switchLookupTab('isbn')" class="btn btn-sm btn-primary" style="border-radius:20px">By ISBN / barcode</button>
+      <button id="lookup-tab-title" onclick="switchLookupTab('title')" class="btn btn-sm" style="border-radius:20px">By title or author</button>
+    </div>
+    <div id="lookup-panel-isbn">
+      <div style="display:flex;gap:8px;align-items:flex-end;margin-bottom:4px;flex-wrap:wrap">
+        <div style="flex:1"><label>ISBN (10 or 13 digits)</label><input type="text" id="isbn-in" placeholder="Type ISBN number…"></div>
+        <button class="scan-btn" onclick="scanISBN()">📷 Scan barcode</button>
+        <button class="btn" onclick="doLookup()" style="height:40px;margin-bottom:0">${lookupLoading?'Looking up…':'Look up ↗'}</button>
+      </div>
+      <div style="font-size:12px;color:var(--muted);margin-bottom:10px">Scan the barcode on the back of the book, or type the ISBN number.</div>
+    </div>
+    <div id="lookup-panel-title" style="display:none">
+      <div style="display:flex;gap:8px;align-items:flex-end;margin-bottom:4px;flex-wrap:wrap">
+        <div style="flex:1"><label>Title or author name</label><input type="text" id="title-search-in" placeholder="e.g. Love and Courage  or  Jagmeet Singh…" onkeydown="if(event.key==='Enter')doTitleSearch()"></div>
+        <button class="btn btn-primary" onclick="doTitleSearch()" id="title-search-btn" style="height:40px;margin-bottom:0">Search ↗</button>
+      </div>
+      <div style="font-size:12px;color:var(--muted);margin-bottom:10px">Searches Google Books and Open Library. Press Enter or click Search.</div>
+      <div id="title-search-results"></div>
+    </div>
+    ${lookupData?`<div class="lookup-box"><div style="font-size:14px;font-weight:600;margin-bottom:4px">${escH(lookupData.title||'')}</div>${lookupData.authors?`<div style="font-size:13px">Author: ${lookupData.authors.map(a=>escH(a.name)).join(', ')}</div>`:''}<button class="btn btn-sm btn-primary" style="margin-top:8px" onclick="fillLookup()">Use this data ↓</button></div>`:''}
+    <div class="divider"></div>
+    <div class="fsec">Book details</div>
+    <div class="form-full">
+      <label>Title * <span style="color:var(--muted);font-weight:400;font-size:11px">— as written on the book</span></label>
+      <input type="text" id="f-title" placeholder="Title in any language">
+      <div class="field-tools">
+        <button class="kbd-lang-btn" onclick="openKbd('f-title')" style="font-size:12px;padding:4px 10px;border:1px solid var(--gold-mid);background:var(--gold-lt);color:var(--gold-dark);border-radius:6px;cursor:pointer">ਗੁ / ह keyboard</button>
+        <button class="translate-btn" onclick="translateField('f-title','en','pa')">EN → ਪੰਜਾਬੀ</button>
+        <button class="translate-btn" onclick="translateField('f-title','en','hi')">EN → हिंदी</button>
+        <button class="translate-btn" onclick="translateField('f-title','pa','en')">ਪੰਜਾਬੀ → EN</button>
+        <span id="f-title-tr-status" style="font-size:12px;color:var(--muted)"></span>
+      </div>
+    </div>
+    <div class="form-row">
+      <div>
+        <label>Author / Contributor <span style="color:var(--muted);font-weight:400;font-size:11px">— as written on the book</span></label>
+        <div id="author-list" style="display:flex;flex-direction:column;gap:6px;margin-bottom:8px">
+          <div class="author-entry" style="display:flex;gap:6px;align-items:center">
+            <input type="text" class="author-input" placeholder="e.g. Guru Nanak Dev Ji" style="flex:1">
+            <button type="button" onclick="removeAuthorField(this)" class="btn btn-sm btn-danger" style="flex-shrink:0;padding:5px 9px;display:none">×</button>
+          </div>
+        </div>
+        <div style="display:flex;gap:6px;flex-wrap:wrap;align-items:center">
+          <button type="button" class="btn btn-sm" onclick="addAuthorField()" style="font-size:12px">+ Add another author</button>
+          <button type="button" class="kbd-lang-btn" onclick="openKbdAuthors()" style="font-size:12px;padding:4px 10px;border:1px solid var(--gold-mid);background:var(--gold-lt);color:var(--gold-dark);border-radius:6px;cursor:pointer">ਗੁ / ह keyboard</button>
+        </div>
+      </div>
+      <div><label>Publisher</label><input type="text" id="f-pub" placeholder="Publisher name"></div>
+    </div>
+    <div class="form-row3"><div><label>Year</label><input type="text" id="f-year" placeholder="e.g. 2019"></div><div><label>ISBN (if has one)</label><input type="text" id="f-isbn" placeholder="Leave blank if none"></div><div><label>Number of copies</label><input type="number" id="f-copies" value="1" min="1" max="99"></div></div>
+    <div style="background:var(--gold-lt);border:1px solid var(--gold-mid);border-radius:8px;padding:14px 16px;margin-bottom:14px">
+      <div style="font-size:12px;font-weight:700;color:var(--gold-dark);margin-bottom:10px;text-transform:uppercase;letter-spacing:.05em">Volume / ਭਾਗ (optional — for multi-volume sets)</div>
+      <div class="form-row" style="margin-bottom:0">
+        <div><label>Volume number</label><input type="number" id="f-vol-num" placeholder="e.g. 1" min="1" max="99"><div style="font-size:11px;color:var(--muted);margin-top:4px">Leave blank if not part of a set</div></div>
+        <div><label>Total volumes in set</label><input type="number" id="f-vol-total" placeholder="e.g. 4" min="1" max="99"></div>
+      </div>
+    </div>
+    <div class="form-row">
+      <div><label>Category *</label><select id="f-cat">${['Sikh Scriptures','Sikh Studies','Literature','General','Children & Youth','Other'].map(g=>`<optgroup label="— ${g} —">${CATS.filter(c=>c.g===g).map(c=>`<option value="${c.id}">${c.label}</option>`).join('')}</optgroup>`).join('')}</select></div>
+      <div><label>Language *</label><select id="f-lang">${LANGS.map(l=>`<option>${l}</option>`).join('')}</select></div>
+    </div>
+    <div class="form-row"><div><label>Condition</label><select id="f-cond"><option>New</option><option selected>Good</option><option>Fair</option><option>Worn</option></select></div><div><label>Notes</label><input type="text" id="f-notes" placeholder="Optional notes"></div></div>
+    <div class="form-full">
+      <label>Shelf location <span style="color:var(--muted);font-weight:400">(optional)</span></label>
+      <div style="display:flex;gap:8px;flex-wrap:wrap">
+        <select id="f-loc-case" style="flex:1;min-width:100px"><option value="">— Bookcase —</option><option>A</option><option>B</option><option>C</option><option>D</option><option>E</option><option>F</option><option>G</option><option>H</option></select>
+        <select id="f-loc-shelf" style="flex:1;min-width:100px"><option value="">— Shelf —</option><option>1</option><option>2</option><option>3</option><option>4</option><option>5</option><option>6</option><option>7</option><option>8</option></select>
+        <div id="f-loc-preview" style="display:flex;align-items:center;font-size:14px;font-weight:700;color:var(--navy);min-width:40px;padding:0 4px"></div>
+      </div>
+      <div style="font-size:11px;color:var(--muted);margin-top:5px">e.g. Bookcase A, Shelf 3 = A3</div>
+    </div>
+    <div class="divider"></div>
+    <div class="fsec">Cover photo (optional)</div>
+    <input type="file" id="cover-file-input" accept="image/*" style="display:none" onchange="onCoverFileChange(event)">
+    <div id="cover-preview-area"></div>
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-top:16px;flex-wrap:wrap;gap:8px">
+      <button class="btn" onclick="clearAdd()">Clear form</button>
+      <button class="btn btn-primary" onclick="checkDuplicateAndAdd()">Add to catalogue</button>
+    </div>
+  </div>`;
+  setTimeout(()=>{
+    pendingCoverImage=null;renderCoverPreview();
+    const lc=document.getElementById('f-loc-case');
+    const ls=document.getElementById('f-loc-shelf');
+    if(lc)lc.addEventListener('change',updateLocPreview);
+    if(ls)ls.addEventListener('change',updateLocPreview);
+  },10);
+}
+
+function updateLocPreview(){const c=document.getElementById('f-loc-case');const s=document.getElementById('f-loc-shelf');const p=document.getElementById('f-loc-preview');if(c&&s&&p){const loc=(c.value&&s.value)?c.value+s.value:'';p.textContent=loc;p.style.background=loc?'var(--sky-lt)':'transparent';p.style.borderRadius='6px';p.style.padding=loc?'4px 10px':'0';}}
+function clearAdd(){addMsg='';lookupData=null;renderAddBook();setTimeout(resetAuthorFields,50);}
+
+async function doLookup(){
+  const isbn=document.getElementById('isbn-in').value.trim().replace(/[-\s]/g,'');
+  if(!isbn){addMsg={ok:false,text:'Please enter an ISBN number first.'};renderAddBook();return;}
+  lookupLoading=true;lookupData=null;renderAddBook();
+  try{const r=await fetch(`https://openlibrary.org/api/books?bibkeys=ISBN:${isbn}&format=json&jscmd=data`);const d=await r.json();const k=Object.keys(d)[0];if(k){lookupData=d[k];lookupData._isbn=isbn;}else{addMsg={ok:false,text:'No book found for that ISBN. Fill details manually.'};}}
+  catch(e){addMsg={ok:false,text:'Lookup failed — check internet connection.'};}
+  lookupLoading=false;renderAddBook();
+}
+
+function fillLookup(){
+  if(!lookupData)return;
+  document.getElementById('f-title').value=lookupData.title||'';
+  resetAuthorFields();
+  const authors=(lookupData.authors||[]).map(a=>a.name);
+  if(authors.length>0){const inputs=document.querySelectorAll('.author-input');if(inputs[0])inputs[0].value=authors[0];authors.slice(1).forEach(name=>{addAuthorField();const all=document.querySelectorAll('.author-input');if(all[all.length-1])all[all.length-1].value=name;});}
+  document.getElementById('f-pub').value=(lookupData.publishers||[]).map(p=>p.name).join(', ');
+  document.getElementById('f-year').value=lookupData.publish_date||'';
+  document.getElementById('f-isbn').value=lookupData._isbn||'';
+}
+
+function addBook(){
+  const title=document.getElementById('f-title').value.trim();
+  const cat=document.getElementById('f-cat').value;
+  if(!title){addMsg={ok:false,text:'Title is required.'};renderAddBook();return;}
+  const copies=Math.max(1,parseInt(document.getElementById('f-copies').value)||1);
+  const volNum=parseInt(document.getElementById('f-vol-num').value)||null;
+  const volTotal=parseInt(document.getElementById('f-vol-total').value)||null;
+  const locCase=document.getElementById('f-loc-case').value;
+  const locShelf=document.getElementById('f-loc-shelf').value;
+  const location=(locCase&&locShelf)?locCase+locShelf:'';
+  const authors=getAuthors();
+  const base={title,author:authors.join(', '),publisher:document.getElementById('f-pub').value.trim(),year:document.getElementById('f-year').value.trim(),isbn:document.getElementById('f-isbn').value.trim(),category:cat,language:document.getElementById('f-lang').value,condition:document.getElementById('f-cond').value,notes:document.getElementById('f-notes').value.trim(),addedDate:new Date().toISOString().split('T')[0],coverImage:pendingCoverImage||null,volumeNum:volNum,volumeTotal:volTotal,location};
+  const firstId=genBookId(cat)+(volNum?'-V'+volNum:'');
+  for(let i=0;i<copies;i++){const rawId=genBookId(cat);const bookId=volNum?rawId+'-V'+volNum:rawId;books.push({...base,id:bookId});}
+  save();addMsg={ok:true,text:`✓ Added ${copies} cop${copies>1?'ies':'y'} of "${title}" — ID ${firstId}`};lookupData=null;renderAddBook();
+}
+
+async function doTitleSearch(){
+  const q=document.getElementById('title-search-in').value.trim();
+  if(!q)return;
+  const btn=document.getElementById('title-search-btn');
+  if(btn){btn.textContent='Searching…';btn.disabled=true;}
+  const resultsEl=document.getElementById('title-search-results');
+  if(resultsEl)resultsEl.innerHTML='<div style="font-size:13px;color:var(--muted);padding:10px 0">Searching Google Books and Open Library…</div>';
+  const [olResults,gbResults]=await Promise.allSettled([searchOpenLibrary(q),searchGoogleBooks(q)]);
+  if(btn){btn.textContent='Search ↗';btn.disabled=false;}
+  let combined=[];
+  if(gbResults.status==='fulfilled')combined.push(...gbResults.value);
+  if(olResults.status==='fulfilled')combined.push(...olResults.value);
+  const seen=[];
+  const deduped=combined.filter(item=>{const norm=t=>(t||'').toLowerCase().replace(/[^a-z0-9]/g,'');const isDup=seen.some(s=>norm(s)===norm(item.title));if(!isDup){seen.push(item.title);return true;}return false;});
+  if(deduped.length===0){if(resultsEl)resultsEl.innerHTML='<div class="msg-warn">No results found. Try simpler keywords.</div>';return;}
+  window._titleSearchResults=deduped;
+  let rows='';
+  deduped.slice(0,12).forEach((doc,i)=>{
+    const coverHTML=doc.cover?`<img src="${doc.cover}" style="width:42px;height:56px;object-fit:cover;border-radius:5px;border:1px solid var(--border)" onerror="this.style.display='none'">`:`<div style="width:42px;height:56px;background:var(--tan-lt);border-radius:5px;border:1px solid var(--border);display:flex;align-items:center;justify-content:center;font-size:20px">📖</div>`;
+    const sourceBg=doc.source==='Google Books'?'#e8f5e9':'var(--sky-lt)';
+    const sourceColor=doc.source==='Google Books'?'#2a7a42':'var(--navy)';
+    rows+=`<div style="display:flex;align-items:center;gap:12px;padding:12px 0;border-bottom:1px solid var(--border);cursor:pointer" onclick="selectTitleResult(${i})"><div style="flex-shrink:0">${coverHTML}</div><div style="flex:1;min-width:0"><div style="font-size:14px;font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">${escH(doc.title)}</div><div style="font-size:12px;color:var(--muted);margin-top:2px">${escH(doc.authors||'—')}${doc.year?' &bull; '+doc.year:''}${doc.publisher?' &bull; '+escH(doc.publisher):''}</div>${doc.isbn?`<div style="font-size:11px;color:var(--muted)">ISBN: ${doc.isbn}</div>`:''}<span style="font-size:10px;font-weight:700;padding:1px 8px;border-radius:10px;background:${sourceBg};color:${sourceColor}">${doc.source}</span></div><button class="btn btn-sm btn-primary" style="flex-shrink:0" onclick="event.stopPropagation();selectTitleResult(${i})">Use</button></div>`;
+  });
+  if(resultsEl)resultsEl.innerHTML=`<div style="font-size:12px;color:var(--muted);margin-bottom:10px;font-weight:500">${deduped.length} result${deduped.length!==1?'s':''} found</div>${rows}`;
+}
+
+async function searchOpenLibrary(q){try{const r=await fetch(`https://openlibrary.org/search.json?q=${encodeURIComponent(q)}&limit=8&fields=key,title,author_name,first_publish_year,isbn,publisher,cover_i`);if(!r.ok)return[];const d=await r.json();return(d.docs||[]).filter(doc=>doc.title).map(doc=>({title:doc.title||'',authors:(doc.author_name||[]).slice(0,3).join(', '),year:doc.first_publish_year||'',publisher:(doc.publisher||[])[0]||'',isbn:(doc.isbn||[])[0]||'',cover:doc.cover_i?`https://covers.openlibrary.org/b/id/${doc.cover_i}-S.jpg`:'',source:'Open Library',raw:doc}));}catch(e){return[];}}
+
+async function searchGoogleBooks(q){try{const r=await fetch(`https://www.googleapis.com/books/v1/volumes?q=${encodeURIComponent(q)}&maxResults=8&printType=books`);if(!r.ok)return[];const d=await r.json();if(!d.items)return[];return d.items.filter(item=>item.volumeInfo&&item.volumeInfo.title).map(item=>{const v=item.volumeInfo;const ids=v.industryIdentifiers||[];const isbn=(ids.find(i=>i.type==='ISBN_13')||ids.find(i=>i.type==='ISBN_10')||{}).identifier||'';const imgs=v.imageLinks||{};const cover=(imgs.thumbnail||imgs.smallThumbnail||'').replace('http://','https://');return{title:v.title||'',authors:(v.authors||[]).slice(0,3).join(', '),year:(v.publishedDate||'').split('-')[0],publisher:v.publisher||'',isbn,cover,source:'Google Books',raw:{...v,categories:v.categories||[],language:v.language||''}};}); }catch(e){return[];}}
+
+function selectTitleResult(i){
+  const doc=window._titleSearchResults&&window._titleSearchResults[i];
+  if(!doc)return;
+  document.getElementById('f-title').value=doc.title||'';
+  resetAuthorFields();
+  const authorList=doc.authors?doc.authors.split(', ').filter(a=>a.trim()):[];
+  if(authorList.length>0){const inputs=document.querySelectorAll('.author-input');if(inputs[0])inputs[0].value=authorList[0];authorList.slice(1).forEach(name=>{addAuthorField();const all=document.querySelectorAll('.author-input');if(all[all.length-1])all[all.length-1].value=name;});}
+  if(doc.year)document.getElementById('f-year').value=doc.year;
+  if(doc.publisher)document.getElementById('f-pub').value=doc.publisher;
+  if(doc.isbn)document.getElementById('f-isbn').value=doc.isbn;
+  const subjects=(doc.raw&&(doc.raw.subjects||doc.raw.subject||doc.raw.categories))||[];
+  const guessedCat=guessCategoryFromBook(doc.title,doc.authors,subjects);
+  if(guessedCat){const catSel=document.getElementById('f-cat');if(catSel){catSel.value=guessedCat;catSel.style.borderColor='var(--gold)';catSel.style.background='var(--gold-lt)';setTimeout(()=>{catSel.style.borderColor='';catSel.style.background='';},2000);}}
+  const langCode=doc.raw&&doc.raw.language;
+  if(langCode){const langMap={en:'English',pa:'Punjabi (Gurmukhi)',hi:'Hindi',ur:'Urdu',sa:'Sanskrit',fr:'French',es:'Spanish',fa:'Farsi / Persian'};const mappedLang=langMap[langCode];if(mappedLang){const langSel=document.getElementById('f-lang');if(langSel){langSel.value=mappedLang;langSel.style.borderColor='var(--gold)';langSel.style.background='var(--gold-lt)';setTimeout(()=>{langSel.style.borderColor='';langSel.style.background='';},2000);}}}
+  if(doc.cover){fetch(doc.cover).then(r=>r.blob()).then(blob=>{const reader=new FileReader();reader.onload=ev=>{compressImage(ev.target.result,200,260,compressed=>{pendingCoverImage=compressed;renderCoverPreview();});};reader.readAsDataURL(blob);}).catch(()=>{});}
+  const resultsEl=document.getElementById('title-search-results');
+  if(resultsEl)resultsEl.innerHTML=`<div class="msg-ok">✓ "${escH(doc.title)}" filled in from ${doc.source}. Check category and language, then click Add to catalogue.</div>`;
+  const titleField=document.getElementById('f-title');
+  if(titleField)setTimeout(()=>titleField.scrollIntoView({behavior:'smooth',block:'center'}),100);
+}
+
+/* ══ CATALOGUE ══ */
+function deleteBookFromEdit(id){const b=bookById(id);if(!b)return;const copies=books.filter(bk=>bk.title===b.title);const loan=activeLoans().find(l=>l.bookId===id);if(loan){alert('This book is currently on loan to '+loan.borrowerName+'. Return it before removing.');return;}const copyWarning=copies.length>1?'\n\nNote: '+copies.length+' copies of this title exist. You are only removing '+id+'.':'';const confirmed=confirm('REMOVE FROM CATALOGUE\n\nBook: '+b.title+'\nID: '+id+copyWarning+'\n\nOnly remove if the physical book no longer exists.\n\nIf you see duplicate entries — those are real separate physical copies.\n\nContinue?');if(!confirmed)return;books=books.filter(bk=>bk.id!==id);save();document.getElementById('edit-book-panel').remove();renderCatalog();const el=document.getElementById('pg-catalog');const msg=document.createElement('div');msg.className='msg-ok';msg.textContent='✓ '+b.title+' ('+id+') removed.';el.insertBefore(msg,el.firstChild);setTimeout(()=>msg.remove(),4000);}
+
+function renderCatalog(){
+  const el=document.getElementById('pg-catalog');
+  const loanMap={};activeLoans().forEach(l=>{loanMap[l.bookId]=l});
+  let filtered=books.filter(b=>{
+    const groups=['Sikh Scriptures','Sikh Studies','Literature','General','Children & Youth','Other'];
+    if(groups.includes(catFilter)&&catInfo(b.category).g!==catFilter)return false;
+    if(catFilter==='scripture'&&!isScrip(b.category))return false;
+    if(!groups.includes(catFilter)&&catFilter!=='all'&&catFilter!=='scripture'&&b.category!==catFilter)return false;
+    if(searchQ){const q=searchQ.toLowerCase();return b.title.toLowerCase().includes(q)||(b.author||'').toLowerCase().includes(q)||b.id.toLowerCase().includes(q)||(b.isbn||'').includes(q);}
+    return true;
+  });
+  el.innerHTML=`
+  <div style="display:flex;gap:8px;margin-bottom:14px">
+    <input type="text" placeholder="Search by title, author, ID or ISBN…" value="${searchQ}" oninput="searchQ=this.value;renderCatalog()" style="flex:1">
+    <button class="btn btn-primary btn-sm" onclick="showTab('addbook')">+ Add book</button>
+  </div>
+  <div class="filters">
+    <button class="chip ${catFilter==='all'?'active':''}" onclick="catFilter='all';renderCatalog()">All (${books.length})</button>
+    ${['Sikh Scriptures','Sikh Studies','Literature','General','Children & Youth'].map(g=>`<button class="chip ${catFilter===g?'active':''}" onclick="catFilter='${g}';renderCatalog()">${g==='Sikh Scriptures'?'☬ ':''}${g}</button>`).join('')}
+    ${CATS.map(c=>`<button class="chip ${catFilter===c.id?'active':''}" onclick="catFilter='${c.id}';renderCatalog()">${c.label}</button>`).join('')}
+  </div>
+  <div style="font-size:13px;color:var(--muted);margin-bottom:10px">${filtered.length} book${filtered.length!==1?'s':''} found</div>
+  <div class="card">${filtered.length?filtered.map(b=>{const loan=loanMap[b.id];return`<div class="book-row">${b.coverImage?`<img src="${b.coverImage}" class="cover-thumb" alt="cover">`:`<div class="spine-label"><div class="s-id">${b.id}</div></div>`}<div class="book-info"><div class="book-title" style="font-family:'Noto Sans Gurmukhi','Noto Sans Devanagari',sans-serif">${escH(b.title)}${b.volumeNum?` <span class="badge b-lang">Vol ${b.volumeNum}${b.volumeTotal?' of '+b.volumeTotal:''}</span>`:''}${isScrip(b.category)?` <span class="badge b-gold">☬ ${catInfo(b.category).label}</span>`:''}</div><div class="book-meta">${b.author&&b.author.includes(', ')?escH(b.author.split(', ')[0])+' <span style="color:var(--muted)">+'+(b.author.split(', ').length-1)+'</span>':escH(b.author||'—')} &nbsp;<span class="badge b-lang">${b.language}</span>${b.location?` &nbsp;<span class="badge" style="background:var(--sky-lt);color:var(--navy);border:1px solid var(--sky);font-family:monospace;font-weight:700">${b.location}</span>`:''}${b.isbn?` &bull; ISBN ${b.isbn}`:''}</div></div><div style="display:flex;gap:6px;align-items:center;flex-shrink:0">${loan?`<span class="badge b-out">Out</span>`:`<span class="badge b-in">In</span>`}<button class="btn btn-sm" onclick="editBook('${b.id}')" title="Edit book" style="color:var(--navy);border-color:var(--sky)">✏</button></div></div>`}).join(''):'<div class="empty">No books match your search</div>'}</div>`;
+}
+
+/* ══ EDIT BOOK ══ */
+function editBook(id){
+  const b=bookById(id);if(!b)return;
+  const existing=document.getElementById('edit-book-panel');if(existing)existing.remove();
+  const catOptgroups=['Sikh Scriptures','Sikh Studies','Literature','General','Children & Youth','Other'].map(g=>`<optgroup label="— ${g} —">${CATS.filter(c=>c.g===g).map(c=>`<option value="${c.id}" ${c.id===b.category?'selected':''}>${c.label}</option>`).join('')}</optgroup>`).join('');
+  const langOpts=LANGS.map(l=>`<option ${l===b.language?'selected':''}>${l}</option>`).join('');
+  const locCase=b.location?b.location[0]:'';const locShelf=b.location?b.location.slice(1):'';
+  const caseOpts=['','A','B','C','D','E','F','G','H'].map(v=>`<option value="${v}" ${v===locCase?'selected':''}>${v||'— Bookcase —'}</option>`).join('');
+  const shelfOpts=['','1','2','3','4','5','6','7','8'].map(v=>`<option value="${v}" ${v===locShelf?'selected':''}>${v||'— Shelf —'}</option>`).join('');
+  const el=document.getElementById('pg-catalog');
+  const panel=document.createElement('div');panel.id='edit-book-panel';
+  panel.innerHTML=`<div class="card" style="border:2px solid var(--gold);margin-bottom:18px">
+    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:16px;flex-wrap:wrap;gap:8px">
+      <div style="font-size:15px;font-weight:700;color:var(--navy)">✏ Edit Book</div>
+      <div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap">
+        <button class="btn btn-sm" onclick="fetchMissingDetails('${id}')" id="fetch-btn-${id}" style="color:var(--gold-dark);border-color:var(--gold);background:var(--gold-lt)">🔍 Fetch missing details</button>
+        <div style="font-size:12px;font-family:monospace;background:var(--navy);color:#fff;padding:3px 10px;border-radius:20px">${id}</div>
+      </div>
+    </div>
+    <div id="fetch-result-${id}" style="margin-bottom:10px"></div>
+    <div class="form-full"><label>Title *</label><input type="text" id="eb-title" value="${escH(b.title)}" style="font-family:'Noto Sans Gurmukhi','Noto Sans Devanagari',sans-serif"></div>
+    <div class="form-row"><div><label>Author / Contributor</label><input type="text" id="eb-author" value="${escH(b.author||'')}"></div><div><label>Publisher</label><input type="text" id="eb-pub" value="${escH(b.publisher||'')}"></div></div>
+    <div class="form-row"><div><label>Year</label><input type="text" id="eb-year" value="${escH(b.year||'')}"></div><div><label>ISBN</label><input type="text" id="eb-isbn" value="${escH(b.isbn||'')}"></div></div>
+    <div class="form-row"><div><label>Category *</label><select id="eb-cat">${catOptgroups}</select></div><div><label>Language *</label><select id="eb-lang">${langOpts}</select></div></div>
+    <div class="form-row"><div><label>Condition</label><select id="eb-cond">${['New','Good','Fair','Worn'].map(c=>`<option ${c===b.condition?'selected':''}>${c}</option>`).join('')}</select></div>
+    <div><label>Shelf location</label><div style="display:flex;gap:8px"><select id="eb-loc-case" style="flex:1">${caseOpts}</select><select id="eb-loc-shelf" style="flex:1">${shelfOpts}</select><div id="eb-loc-preview" style="display:flex;align-items:center;font-size:14px;font-weight:700;color:var(--navy);min-width:36px;padding:0 4px">${b.location||''}</div></div></div></div>
+    <div class="form-row"><div><label>Volume number</label><input type="number" id="eb-vol-num" value="${b.volumeNum||''}" min="1" max="99" placeholder="e.g. 1"></div><div><label>Total volumes</label><input type="number" id="eb-vol-total" value="${b.volumeTotal||''}" min="1" max="99" placeholder="e.g. 4"></div></div>
+    <div class="form-full"><label>Notes</label><input type="text" id="eb-notes" value="${escH(b.notes||'')}"></div>
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-top:16px;flex-wrap:wrap;gap:8px">
+      <button class="btn btn-danger btn-sm" onclick="deleteBookFromEdit('${id}')">🗑 Remove this book…</button>
+      <div style="display:flex;gap:8px"><button class="btn" onclick="document.getElementById('edit-book-panel').remove()">Cancel</button><button class="btn btn-primary" onclick="saveEditBook('${id}')">Save changes</button></div>
+    </div>
+  </div>`;
+  el.insertBefore(panel,el.firstChild);
+  panel.scrollIntoView({behavior:'smooth',block:'start'});
+  ['eb-loc-case','eb-loc-shelf'].forEach(selId=>{const sel=document.getElementById(selId);if(sel)sel.addEventListener('change',()=>{const c=document.getElementById('eb-loc-case').value;const s=document.getElementById('eb-loc-shelf').value;const p=document.getElementById('eb-loc-preview');const loc=(c&&s)?c+s:'';if(p){p.textContent=loc;p.style.background=loc?'var(--sky-lt)':'transparent';p.style.padding=loc?'4px 10px':'0';}});});
+  setTimeout(()=>{const f=document.getElementById('eb-title');if(f)f.focus();},100);
+}
+
+function saveEditBook(id){
+  const b=bookById(id);if(!b)return;
+  const title=document.getElementById('eb-title').value.trim();
+  if(!title){alert('Title is required.');return;}
+  b.title=title;b.author=document.getElementById('eb-author').value.trim();b.publisher=document.getElementById('eb-pub').value.trim();b.year=document.getElementById('eb-year').value.trim();b.isbn=document.getElementById('eb-isbn').value.trim();b.category=document.getElementById('eb-cat').value;b.language=document.getElementById('eb-lang').value;b.condition=document.getElementById('eb-cond').value;b.notes=document.getElementById('eb-notes').value.trim();b.volumeNum=parseInt(document.getElementById('eb-vol-num').value)||null;b.volumeTotal=parseInt(document.getElementById('eb-vol-total').value)||null;
+  const locCase=document.getElementById('eb-loc-case').value;const locShelf=document.getElementById('eb-loc-shelf').value;b.location=(locCase&&locShelf)?locCase+locShelf:'';
+  save();const panel=document.getElementById('edit-book-panel');if(panel)panel.remove();searchQ='';catFilter='all';renderCatalog();
+  const el=document.getElementById('pg-catalog');const msg=document.createElement('div');msg.className='msg-ok';msg.textContent=`✓ "${title}" (${id}) updated successfully.`;el.insertBefore(msg,el.firstChild);setTimeout(()=>msg.remove(),4000);
+}
+
+/* ══ BORROWERS ══ */
+function renderBorrowers(){
+  const el=document.getElementById('pg-borrowers');
+  let filtered=borrowers.filter(b=>!bSearchQ||(b.name+b.id+(b.email||'')+(b.phone||'')).toLowerCase().includes(bSearchQ.toLowerCase()));
+  el.innerHTML=`${brMsg?`<div class="${brMsg.ok?'msg-ok':'msg-err'}">${brMsg.text}</div>`:''}
+  <div class="two-col" style="align-items:start">
+    <div><div class="section-title">Register new borrower</div>
+      <div class="card">
+        <div class="form-row"><div><label>First name *</label><input type="text" id="br-fname" placeholder="First name"></div><div><label>Last name *</label><input type="text" id="br-lname" placeholder="Last name"></div></div>
+        <div class="form-full"><label>Email address</label><input type="email" id="br-email" placeholder="email@example.com"></div>
+        <div class="form-full"><label>Phone number</label><input type="text" id="br-phone" placeholder="647-xxx-xxxx"></div>
+        <div class="form-full"><label>Address (optional)</label><input type="text" id="br-addr" placeholder="Street address, city"></div>
+        <div class="form-full"><label>Notes</label><input type="text" id="br-notes" placeholder="e.g. prefers Punjabi books"></div>
+        <div class="action-row"><button class="btn btn-primary" onclick="addBorrower()">Register borrower</button></div>
+      </div>
+    </div>
+    <div><div class="section-title">Borrower directory (${borrowers.length})</div>
+      <input type="text" placeholder="Search by name, ID or email…" value="${bSearchQ}" oninput="bSearchQ=this.value;renderBorrowers()" style="margin-bottom:14px">
+      <div class="card">${filtered.length?filtered.map(b=>{const al=activeLoans().filter(l=>l.borrowerId===b.id).length;return`<div class="mbr-row"><div class="mbr-avatar">${initials(b.name)}</div><div style="flex:1;min-width:0"><div style="font-size:14px;font-weight:500">${escH(b.name)}</div><div style="font-size:12px;color:var(--muted)">${b.id}${b.email?` &bull; ${b.email}`:''}${b.phone?` &bull; ${b.phone}`:''}</div></div><div style="display:flex;gap:6px;align-items:center">${al?`<span class="badge b-out">${al} out</span>`:''}<button class="btn btn-sm" onclick="editBorrower('${b.id}')" title="Edit" style="color:var(--navy);border-color:var(--sky)">✏</button><button class="btn btn-sm" onclick="showTab('libcards');preSelectCard('${b.id}')" title="Print card">🪪</button><button class="btn btn-sm btn-danger" onclick="deleteBorrower('${b.id}')">×</button></div></div>`}).join(''):'<div class="empty">No borrowers registered yet</div>'}</div>
+    </div>
+  </div>`;
+}
+function addBorrower(){const fn=document.getElementById('br-fname').value.trim();const ln=document.getElementById('br-lname').value.trim();if(!fn||!ln){brMsg={ok:false,text:'First and last name are required.'};renderBorrowers();return;}const id=genMbrId();borrowers.push({id,name:fn+' '+ln,email:document.getElementById('br-email').value.trim(),phone:document.getElementById('br-phone').value.trim(),address:document.getElementById('br-addr').value.trim(),notes:document.getElementById('br-notes').value.trim(),joinDate:new Date().toISOString().split('T')[0]});save();brMsg={ok:true,text:`✓ ${fn} ${ln} registered as ${id}`};renderBorrowers();}
+function deleteBorrower(id){if(!confirm('Remove this borrower?'))return;borrowers=borrowers.filter(b=>b.id!==id);save();renderBorrowers();}
+
+/* ══ EDIT BORROWER ══ */
+function editBorrower(id){
+  const b=borrowerById(id);if(!b)return;
+  const existing=document.getElementById('edit-borrower-panel');if(existing)existing.remove();
+  const el=document.getElementById('pg-borrowers');
+  const panel=document.createElement('div');panel.id='edit-borrower-panel';
+  panel.innerHTML=`<div class="card" style="border:2px solid var(--gold);margin-bottom:18px"><div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:14px"><div style="font-size:15px;font-weight:700;color:var(--navy)">Edit borrower — ${escH(b.name)}</div><div style="font-size:12px;color:var(--muted);font-family:monospace">${b.id}</div></div><div class="form-row"><div><label>First name *</label><input type="text" id="eb-fname" value="${escH(b.name.split(' ')[0])}"></div><div><label>Last name *</label><input type="text" id="eb-lname" value="${escH(b.name.split(' ').slice(1).join(' '))}"></div></div><div class="form-full"><label>Email address</label><input type="email" id="eb-email" value="${escH(b.email||'')}" placeholder="email@example.com"></div><div class="form-full"><label>Phone number</label><input type="text" id="eb-phone" value="${escH(b.phone||'')}" placeholder="647-xxx-xxxx"></div><div class="form-full"><label>Address</label><input type="text" id="eb-addr" value="${escH(b.address||'')}"></div><div class="form-full"><label>Notes</label><input type="text" id="eb-notes" value="${escH(b.notes||'')}"></div><div class="action-row"><button class="btn" onclick="document.getElementById('edit-borrower-panel').remove()">Cancel</button><button class="btn btn-primary" onclick="saveEditBorrower('${b.id}')">Save changes</button></div></div>`;
+  el.insertBefore(panel,el.firstChild);panel.scrollIntoView({behavior:'smooth',block:'start'});
+  setTimeout(()=>{const f=document.getElementById('eb-fname');if(f)f.focus();},100);
+}
+function saveEditBorrower(id){const b=borrowerById(id);if(!b)return;const fn=document.getElementById('eb-fname').value.trim();const ln=document.getElementById('eb-lname').value.trim();if(!fn||!ln){brMsg={ok:false,text:'First and last name are required.'};document.getElementById('edit-borrower-panel').remove();renderBorrowers();return;}b.name=fn+' '+ln;b.email=document.getElementById('eb-email').value.trim();b.phone=document.getElementById('eb-phone').value.trim();b.address=document.getElementById('eb-addr').value.trim();b.notes=document.getElementById('eb-notes').value.trim();save();brMsg={ok:true,text:`✓ ${b.name} updated successfully.`};renderBorrowers();}
+
+/* ══ LENDING ══ */
+function renderLending(){
+  const el=document.getElementById('pg-lending');
+  const active=activeLoans();const od=active.filter(isOverdue);const hist=loans.filter(l=>l.returned).slice(-30).reverse();
+  el.innerHTML=`<div class="two-col"><div><div class="section-title">Active loans (${active.length})${od.length?` &nbsp;<span style="color:#b63a3a;font-size:11px;font-weight:700">${od.length} OVERDUE</span>`:''}</div>
+    <div class="card">${active.length?active.map(l=>{const bk=bookById(l.bookId);const over=isOverdue(l);return`<div class="loan-row"><div style="flex:1"><div style="font-size:14px;font-weight:500">${escH(l.borrowerName)}</div><div style="font-size:12px;color:var(--muted)">${bk?escH(bk.title):'?'}</div><div style="font-size:12px;${over?'color:#b63a3a;font-weight:600':''}">${over?'⚠ Overdue — ':'Due: '}${fmtDate(l.dueDate)}</div>${l.email?`<div style="font-size:12px;color:var(--muted)">${l.email}</div>`:''}</div><div style="display:flex;flex-direction:column;gap:5px;align-items:flex-end;flex-shrink:0"><span class="book-id">${l.bookId}</span><button class="btn btn-sm btn-primary" onclick="returnLoan('${l.id}')">Return</button></div></div>`}).join(''):'<div class="empty">No active loans</div>'}</div></div>
+    <div><div class="section-title">Return history</div><div class="card">${hist.length?hist.map(l=>{const bk=bookById(l.bookId);return`<div class="loan-row"><div style="flex:1"><div style="font-size:14px;font-weight:500">${escH(l.borrowerName)}</div><div style="font-size:12px;color:var(--muted)">${bk?escH(bk.title):'?'} &bull; Returned ${fmtDate(l.returnedDate)}</div></div><span class="badge b-in">Done</span></div>`}).join(''):'<div class="empty">No returns yet</div>'}</div></div></div>`;
+}
+function returnLoan(id){const l=loans.find(x=>x.id===id);if(!l)return;l.returned=true;l.returnedDate=new Date().toISOString().split('T')[0];save();renderLending();}
+
+/* ══ OVERDUES ══ */
+function renderOverdues(){
+  const el=document.getElementById('pg-overdues');
+  const overdueLoans=activeLoans().filter(isOverdue).sort((a,b)=>new Date(a.dueDate)-new Date(b.dueDate));
+  const daysPast=l=>Math.floor((new Date()-new Date(l.dueDate))/(1000*60*60*24));
+  let rows='';
+  overdueLoans.forEach(l=>{const bk=bookById(l.bookId);const days=daysPast(l);const urgency=days>30?'color:#b63a3a;font-weight:700':days>14?'color:#e65100;font-weight:600':'color:#b63a3a';rows+=`<div style="display:grid;grid-template-columns:1fr 1fr 80px 110px 70px;gap:8px;padding:12px 0;border-bottom:1px solid var(--border);align-items:center" class="od-grid"><div><div style="font-size:14px;font-weight:500">${escH(l.borrowerName)}</div>${l.email?`<div style="font-size:12px;color:var(--muted)">${l.email}</div>`:''} ${l.phone?`<div style="font-size:12px;color:var(--muted)">${l.phone}</div>`:''}</div><div class="od-col-book" style="font-size:13px;font-family:'Noto Sans Gurmukhi','Noto Sans Devanagari',sans-serif">${bk?escH(bk.title):'Unknown'}</div><div class="od-col-id"><span class="book-id">${l.bookId}</span></div><div style="font-size:13px;${urgency}">${fmtDate(l.dueDate)}</div><div style="font-size:14px;font-weight:700;${urgency}">${days}d</div></div>`;});
+  const tableHTML=overdueLoans.length?`<div class="card"><div style="display:grid;grid-template-columns:1fr 1fr 80px 110px 70px;gap:8px;padding:8px 0;border-bottom:2px solid var(--border);font-size:11px;font-weight:700;color:var(--navy);text-transform:uppercase;letter-spacing:.06em" class="od-grid"><div>Borrower</div><div class="od-col-book">Book</div><div class="od-col-id">Book ID</div><div>Due date</div><div>Days late</div></div>${rows}</div><div style="margin-top:10px"><button class="btn btn-sm" onclick="exportOverdueCSV()">Export overdue list CSV</button></div>`:`<div class="empty" style="padding:60px;text-align:center"><div style="font-size:48px;margin-bottom:12px">✓</div><div style="font-size:16px;font-weight:500;color:#2a7a42">No overdue books!</div></div>`;
+  el.innerHTML=`<div style="background:#fdecea;border:1px solid #f5c6cb;border-radius:var(--radius);padding:16px 20px;margin-bottom:20px;display:flex;align-items:center;gap:14px"><div style="font-size:36px;font-weight:700;color:#b63a3a;min-width:50px;text-align:center">${overdueLoans.length}</div><div><div style="font-size:16px;font-weight:700;color:#b63a3a">Overdue book${overdueLoans.length!==1?'s':''}</div><div style="font-size:13px;color:var(--muted);margin-top:2px">Books not returned by their due date.</div></div></div>${tableHTML}`;
+  const tabEl=document.getElementById('tab-overdues');if(tabEl)tabEl.textContent=overdueLoans.length?`⚠ Overdues (${overdueLoans.length})`:'⚠ Overdues';
+}
+function exportOverdueCSV(){const overdueLoans=activeLoans().filter(isOverdue);const rows=[['Borrower','Email','Phone','Book ID','Book Title','Due Date','Days Overdue']];overdueLoans.forEach(l=>{const bk=bookById(l.bookId);const days=Math.floor((new Date()-new Date(l.dueDate))/(1000*60*60*24));rows.push([l.borrowerName,l.email||'',l.phone||'',l.bookId,bk?bk.title:'',l.dueDate,days]);});const csv=rows.map(r=>r.map(c=>'"'+(String(c).replace(/"/g,'""'))+'"').join(',')).join('\n');const blob=new Blob(['\uFEFF'+csv],{type:'text/csv;charset=utf-8'});const url=URL.createObjectURL(blob);const a=document.createElement('a');a.href=url;a.download='overdue_books.csv';a.click();URL.revokeObjectURL(url);}
+
+/* ══ CHECKOUT ══ */
+function renderCheckout(){
+  const el=document.getElementById('pg-checkout');
+  el.innerHTML=`${coMsg?`<div class="${coMsg.ok?'msg-ok':'msg-err'}">${coMsg.text}</div>`:''}
+  <div class="two-col" style="align-items:start">
+    <div><div class="section-title">Check out a book</div>
+      <div class="card">
+        <div class="form-full"><label>Book ID *</label><div style="display:flex;gap:8px;flex-wrap:wrap" class="scan-row-mobile"><input type="text" id="co-bid" placeholder="e.g. GTK-0001" oninput="previewBook(this.value.toUpperCase())" style="flex:1"><button class="scan-btn" onclick="scanBookId()">📷 Scan</button></div><div id="co-bpreview" style="font-size:13px;margin-top:6px;min-height:18px"></div></div>
+        <div class="form-full"><label>Borrower *</label><div class="suggest-box"><input type="text" id="co-bname" placeholder="Type name or member ID…" oninput="showBSuggest(this.value)" autocomplete="off"><div id="co-suggest" class="suggest-list"></div></div><div style="font-size:12px;color:var(--muted);margin-top:4px">Or register them first in the Borrowers tab.</div></div>
+        <input type="hidden" id="co-mbrid">
+        <div class="form-row"><div><label>Email</label><input type="email" id="co-email"></div><div><label>Phone</label><input type="text" id="co-phone" placeholder="647-xxx-xxxx"></div></div>
+        <div class="form-full"><label>Due date</label><input type="date" id="co-due" value="${new Date(Date.now()+14*864e5).toISOString().split('T')[0]}"></div>
+        <div class="action-row"><button class="btn btn-primary" onclick="checkoutBook()">Check out book</button></div>
+      </div>
+    </div>
+    <div>
+      <div class="section-title">Quick return</div>
+      <div class="card"><label>Enter or scan Book ID to return</label><div style="display:flex;gap:8px;margin-bottom:12px;flex-wrap:wrap" class="scan-row-mobile"><input type="text" id="ret-id" placeholder="e.g. GTK-0001" style="flex:1"><button class="scan-btn" onclick="scanReturnId()">📷 Scan</button></div><button class="btn btn-green" style="width:100%" onclick="quickReturn()">Return book</button></div>
+      <div class="section-title" style="margin-top:16px">On loan right now (${activeLoans().length})</div>
+      <div class="card" style="max-height:320px;overflow-y:auto">${activeLoans().map(l=>{const bk=bookById(l.bookId);const over=isOverdue(l);return`<div class="loan-row"><div style="flex:1"><div style="font-size:13px;font-weight:500">${escH(l.borrowerName)}</div><div style="font-size:12px;${over?'color:#b63a3a':''}">${bk?escH(bk.title):'?'}${over?' ⚠':''}</div></div><span class="book-id">${l.bookId}</span></div>`}).join('')||'<div class="empty" style="padding:16px">All books are in</div>'}</div>
+    </div>
+  </div>`;
+}
+function previewBook(val){const el=document.getElementById('co-bpreview');if(!el)return;const bk=bookById(val);if(!bk){el.innerHTML=val?'<span style="color:var(--muted)">Not found</span>':'';return;}const loan=activeLoans().find(l=>l.bookId===bk.id);el.innerHTML=loan?`<span style="color:#b63a3a">Already on loan to ${escH(loan.borrowerName)}</span>`:`<span style="color:#2a7a42">✓ ${escH(bk.title)} — ${bk.language}</span>`;}
+function showBSuggest(q){const box=document.getElementById('co-suggest');if(!box)return;if(!q){box.style.display='none';return;}const m=borrowers.filter(b=>(b.name+b.id+(b.email||'')+(b.phone||'')).toLowerCase().includes(q.toLowerCase())).slice(0,7);if(!m.length){box.style.display='none';return;}box.innerHTML=m.map(b=>`<div class="suggest-item" onclick="selBorrower('${b.id}')"><strong>${escH(b.name)}</strong> <span style="color:var(--muted);font-size:12px">${b.id}${b.email?' &bull; '+b.email:''}</span></div>`).join('');box.style.display='block';}
+function selBorrower(id){const b=borrowerById(id);if(!b)return;document.getElementById('co-bname').value=b.name;document.getElementById('co-mbrid').value=b.id;if(b.email)document.getElementById('co-email').value=b.email;if(b.phone)document.getElementById('co-phone').value=b.phone;document.getElementById('co-suggest').style.display='none';}
+document.addEventListener('click',e=>{const s=document.getElementById('co-suggest');if(s&&!s.contains(e.target))s.style.display='none';});
+function checkoutBook(){const bid=document.getElementById('co-bid').value.trim().toUpperCase();const name=document.getElementById('co-bname').value.trim();const email=document.getElementById('co-email').value.trim();const phone=document.getElementById('co-phone').value.trim();const due=document.getElementById('co-due').value;const mbrId=document.getElementById('co-mbrid').value;if(!bid||!name){coMsg={ok:false,text:'Book ID and borrower name are required.'};renderCheckout();return;}if(!bookById(bid)){coMsg={ok:false,text:'Book ID not found.'};renderCheckout();return;}if(activeLoans().find(l=>l.bookId===bid)){coMsg={ok:false,text:'This book is already on loan.'};renderCheckout();return;}loans.push({id:Date.now().toString(),bookId:bid,borrowerName:name,borrowerId:mbrId||null,email,phone,dueDate:due,returned:false,loanDate:new Date().toISOString().split('T')[0]});save();coMsg={ok:true,text:`✓ "${bookById(bid).title}" checked out to ${name}. Due ${fmtDate(due)}.`};renderCheckout();}
+function quickReturn(){const id=document.getElementById('ret-id').value.trim().toUpperCase();const loan=activeLoans().find(l=>l.bookId===id);if(!loan){coMsg={ok:false,text:'No active loan for that ID.'};renderCheckout();return;}loan.returned=true;loan.returnedDate=new Date().toISOString().split('T')[0];save();coMsg={ok:true,text:`✓ "${bookById(id)?bookById(id).title:id}" returned.`};renderCheckout();}
+
+/* ══ LABELS ══ */
+function renderLabels(){
+  const el=document.getElementById('pg-labels');
+  el.innerHTML=`<div style="display:flex;align-items:center;gap:10px;margin-bottom:16px;flex-wrap:wrap"><div style="flex:1;font-size:13px;color:var(--muted)">${selectedLabels.size} label${selectedLabels.size!==1?'s':''} selected — each includes a scannable barcode</div><button class="btn btn-sm" onclick="selectedLabels=new Set(books.map(b=>b.id));renderLabels()">Select all</button><button class="btn btn-sm" onclick="selectedLabels.clear();renderLabels()">Clear all</button><button class="btn btn-primary btn-sm" onclick="printLabels()" ${!selectedLabels.size?'disabled':''}>Print labels (${selectedLabels.size})</button></div>
+  <div style="font-size:13px;color:var(--muted);margin-bottom:14px">Each label has a Code128 barcode for the Book ID. Stick inside the front cover.</div>
+  ${books.length?`<div class="label-grid">${books.map(b=>{const sel=selectedLabels.has(b.id);const bcid='bc'+b.id.replace(/[^a-zA-Z0-9]/g,'');return`<div class="label-card ${sel?'selected':''}" onclick="toggleLabel('${b.id}')"><div class="sel-check">${sel?'☑':'☐'}</div><div class="lc-id">${b.id}</div><div class="lc-title">${escH(b.title)}</div><div class="lc-meta">${escH(b.author||'—')} &bull; ${b.language}</div><div class="lc-meta">${catInfo(b.category).label}${isScrip(b.category)?' ☬':''}</div><div class="barcode-wrap"><svg id="${bcid}"></svg></div><div class="lc-org">Sikh Spiritual Centre Toronto</div></div>`;}).join('')}</div>`:'<div class="empty">No books yet</div>'}`;
+  setTimeout(()=>{books.forEach(b=>{const bcid='bc'+b.id.replace(/[^a-zA-Z0-9]/g,'');const el=document.getElementById(bcid);if(el)try{JsBarcode(el,b.id,{format:'CODE128',width:1.4,height:32,displayValue:false,margin:2});}catch(e){}});},80);
+}
+function toggleLabel(id){if(selectedLabels.has(id))selectedLabels.delete(id);else selectedLabels.add(id);renderLabels();}
+function printLabels(){if(!selectedLabels.size)return;const sel=books.filter(b=>selectedLabels.has(b.id));const pa=document.getElementById('print-area');pa.innerHTML=`<div style="font-family:Georgia,serif;padding:10px"><p style="font-size:11px;color:#666;margin-bottom:14px">Sikh Spiritual Centre Toronto — Book Labels — ${new Date().toLocaleDateString('en-CA')}</p>${sel.map((b,i)=>`<div class="print-label"><div class="pl-id">${b.id}</div><div class="pl-title">${escH(b.title)}</div><div class="pl-meta">${escH(b.author||'—')}</div><div class="pl-meta">${catInfo(b.category).label}${isScrip(b.category)?' ☬':''} &bull; ${b.language}</div>${b.isbn?`<div class="pl-meta">ISBN ${b.isbn}</div>`:''}<div class="pl-barcode"><svg id="pbc${i}"></svg></div><div class="pl-org">Sikh Spiritual Centre Toronto</div></div>`).join('')}</div>`;setTimeout(()=>{sel.forEach((b,i)=>{const el=document.getElementById('pbc'+i);if(el)try{JsBarcode(el,b.id,{format:'CODE128',width:1.6,height:40,displayValue:true,fontSize:10,margin:2});}catch(e){}});setTimeout(()=>window.print(),300);},100);}
+
+/* ══ LIBRARY CARDS ══ */
+function preSelectCard(id){selectedCards.clear();selectedCards.add(id);renderLibCards();}
+function lCardHTML(b,forPrint){const since=b.joinDate?new Date(b.joinDate).getFullYear():'';if(forPrint)return`<div class="print-lcard"><div style="position:absolute;right:-10px;bottom:-20px;font-size:90px;opacity:.07">☬</div><div style="display:flex;align-items:center;gap:8px;margin-bottom:12px"><div style="font-size:22px">☬</div><div><div style="font-size:10px;opacity:.85;font-weight:600">Sikh Spiritual Centre Toronto</div><div style="font-size:9px;opacity:.6;letter-spacing:.05em">LENDING LIBRARY</div></div></div><div style="font-size:17px;font-weight:600;margin-bottom:3px">${escH(b.name)}</div><div style="font-size:12px;font-family:monospace;opacity:.75;letter-spacing:.1em;margin-bottom:6px">${b.id}</div><div style="font-size:10px;opacity:.7;line-height:1.7">${b.email||''}${b.phone?'\n'+b.phone:''}</div><div style="position:absolute;bottom:10px;right:14px;font-size:9px;opacity:.5">Member since ${since}</div></div>`;return`<div class="lcard-preview"><div style="position:absolute;right:-10px;bottom:-20px;font-size:90px;opacity:.07">☬</div><div style="display:flex;align-items:center;gap:8px;margin-bottom:10px"><div style="font-size:20px;opacity:.9">☬</div><div><div style="font-size:11px;opacity:.85;font-weight:600">Sikh Spiritual Centre Toronto</div><div style="font-size:10px;opacity:.65">LENDING LIBRARY</div></div></div><div style="font-size:18px;font-weight:600;margin-bottom:3px">${escH(b.name)}</div><div style="font-size:12px;font-family:monospace;opacity:.8;letter-spacing:.1em;margin-bottom:8px">${b.id}</div><div style="font-size:11px;opacity:.75">${b.email||''}${b.phone?' | '+b.phone:''}</div><div style="position:absolute;bottom:14px;right:16px;font-size:10px;opacity:.55">Member since ${since}</div></div>`;}
+function renderLibCards(){const el=document.getElementById('pg-libcards');if(!borrowers.length){el.innerHTML=`<div class="empty" style="padding:60px">No borrowers registered yet.<br><br><button class="btn btn-primary" onclick="showTab('borrowers')">Register borrowers →</button></div>`;return;}el.innerHTML=`<div style="display:flex;align-items:center;gap:10px;margin-bottom:16px;flex-wrap:wrap"><div style="flex:1;font-size:13px;color:var(--muted)">${selectedCards.size} card${selectedCards.size!==1?'s':''} selected — prints at credit card size</div><button class="btn btn-sm" onclick="selectedCards=new Set(borrowers.map(b=>b.id));renderLibCards()">Select all</button><button class="btn btn-sm" onclick="selectedCards.clear();renderLibCards()">Clear all</button><button class="btn btn-primary btn-sm" onclick="printCards()" ${!selectedCards.size?'disabled':''}>Print (${selectedCards.size})</button></div><div class="card-grid">${borrowers.map(b=>{const sel=selectedCards.has(b.id);return`<div class="lcard-wrap ${sel?'selected':''}" onclick="toggleCard('${b.id}')">${lCardHTML(b,false)}<div style="text-align:center;font-size:12px;color:var(--muted);margin-top:8px">${sel?'☑ Selected':'Click to select'}</div></div>`}).join('')}</div>`;}
+function toggleCard(id){if(selectedCards.has(id))selectedCards.delete(id);else selectedCards.add(id);renderLibCards();}
+function printCards(){if(!selectedCards.size)return;const sel=borrowers.filter(b=>selectedCards.has(b.id));const pa=document.getElementById('print-area');pa.innerHTML=`<div style="font-family:sans-serif;padding:8px"><p style="font-size:11px;color:#666;margin-bottom:10px">Sikh Spiritual Centre Toronto — Library Cards — ${new Date().toLocaleDateString('en-CA')}</p>${sel.map(b=>lCardHTML(b,true)).join('')}</div>`;window.print();}
+
+/* ══ ADMIN ══ */
+function renderAdmin(){
+  const el=document.getElementById('pg-admin');
+  const totalBooks=books.length,totalLoans=loans.length,totalBorrowers=borrowers.length,activeCount=activeLoans().length,returnedCount=loans.filter(l=>l.returned).length,overdueCount=activeLoans().filter(isOverdue).length;
+  const catCounts={};books.forEach(b=>{catCounts[b.category]=(catCounts[b.category]||0)+1});
+  el.innerHTML=`<div class="two-col" style="align-items:start;gap:20px"><div>
+    <div class="section-title">Export data</div>
+    <div class="card">
+      <div style="font-size:14px;font-weight:500;color:var(--text);margin-bottom:4px">Download as CSV spreadsheet</div>
+      <div style="font-size:13px;color:var(--muted);margin-bottom:16px;line-height:1.5">Export any dataset to a CSV file. Open in Excel, Numbers, or any spreadsheet app.</div>
+      <div style="display:flex;flex-direction:column;gap:10px">
+        <div style="display:flex;align-items:center;justify-content:space-between;padding:12px 14px;background:var(--tan-lt);border-radius:8px"><div><div style="font-size:13px;font-weight:500">📚 Books catalogue</div><div style="font-size:12px;color:var(--muted);margin-top:2px">${totalBooks} book${totalBooks!==1?'s':''}</div></div><button class="btn btn-sm" onclick="exportCSV('books')" style="background:var(--navy);border-color:var(--navy);color:#fff;flex-shrink:0">Export</button></div>
+        <div style="display:flex;align-items:center;justify-content:space-between;padding:12px 14px;background:var(--tan-lt);border-radius:8px"><div><div style="font-size:13px;font-weight:500">📋 Loans history</div><div style="font-size:12px;color:var(--muted);margin-top:2px">${totalLoans} total — ${activeCount} active, ${returnedCount} returned${overdueCount?`, ${overdueCount} overdue`:''}</div></div><button class="btn btn-sm" onclick="exportCSV('loans')" style="background:var(--navy);border-color:var(--navy);color:#fff;flex-shrink:0">Export</button></div>
+        <div style="display:flex;align-items:center;justify-content:space-between;padding:12px 14px;background:var(--tan-lt);border-radius:8px"><div><div style="font-size:13px;font-weight:500">👥 Borrower registry</div><div style="font-size:12px;color:var(--muted);margin-top:2px">${totalBorrowers} registered</div></div><button class="btn btn-sm" onclick="exportCSV('borrowers')" style="background:var(--navy);border-color:var(--navy);color:#fff;flex-shrink:0">Export</button></div>
+        ${overdueCount?`<div style="display:flex;align-items:center;justify-content:space-between;padding:12px 14px;background:#fdecea;border-radius:8px;border:1px solid #f5c6cb"><div><div style="font-size:13px;font-weight:500;color:#b63a3a">⚠ Overdue books</div><div style="font-size:12px;color:var(--muted);margin-top:2px">${overdueCount} past due</div></div><button class="btn btn-sm" onclick="exportOverdueCSV()" style="background:#b63a3a;border-color:#b63a3a;color:#fff;flex-shrink:0">Export</button></div>`:''}
+      </div>
+      <div style="margin-top:14px;padding-top:14px;border-top:1px solid var(--border)"><button class="btn btn-primary" style="width:100%" onclick="exportAll()">Export all 3 at once</button></div>
+    </div>
+    <div class="section-title" style="margin-top:4px">Remove a book from catalogue</div>
+    <div class="card">
+      <div style="background:#fff8e1;border:1px solid #ffe0b2;border-radius:8px;padding:12px 14px;margin-bottom:14px;font-size:13px;color:#b36000;line-height:1.6"><strong>Only remove if the physical copy no longer exists</strong> — lost, damaged, donated. Two identical entries = two physical copies. Do not delete one.</div>
+      <div style="display:flex;gap:8px;margin-bottom:10px;flex-wrap:wrap"><input type="text" id="admin-remove-id" placeholder="Enter Book ID e.g. GTK-0001" oninput="previewAdminRemove(this.value)" style="flex:1"><button class="btn btn-sm btn-danger" onclick="adminRemoveBook()">Remove</button></div>
+      <div id="admin-remove-preview" style="font-size:13px;color:var(--muted);min-height:18px"></div>
+    </div>
+    <div class="section-title" style="margin-top:4px">Data management</div>
+    <div class="card"><div style="font-size:13px;color:var(--muted);margin-bottom:14px;line-height:1.5">Data is saved in this browser's localStorage.</div><button class="btn btn-sm btn-danger" style="width:100%" onclick="clearAllData()">⚠ Clear all library data…</button></div>
+  </div>
+  <div>
+    <div class="section-title">Collection summary</div>
+    <div class="card">
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:14px">
+        <div style="background:var(--tan-lt);border-radius:8px;padding:12px 14px;text-align:center"><div style="font-size:24px;font-weight:700;color:var(--navy)">${totalBooks}</div><div style="font-size:12px;color:var(--muted);margin-top:2px">Total books</div></div>
+        <div style="background:var(--tan-lt);border-radius:8px;padding:12px 14px;text-align:center"><div style="font-size:24px;font-weight:700;color:var(--navy)">${totalBorrowers}</div><div style="font-size:12px;color:var(--muted);margin-top:2px">Borrowers</div></div>
+        <div style="background:var(--sky-lt);border-radius:8px;padding:12px 14px;text-align:center"><div style="font-size:24px;font-weight:700;color:#2a7a42">${totalBooks-activeCount}</div><div style="font-size:12px;color:var(--muted);margin-top:2px">Available now</div></div>
+        <div style="background:${overdueCount?'#fdecea':'var(--tan-lt)'};border-radius:8px;padding:12px 14px;text-align:center"><div style="font-size:24px;font-weight:700;color:${overdueCount?'#b63a3a':'var(--navy)'}">${overdueCount}</div><div style="font-size:12px;color:var(--muted);margin-top:2px">Overdue</div></div>
+      </div>
+      <div style="border-top:1px solid var(--border);padding-top:12px"><div class="section-title" style="margin-bottom:10px">By category</div>${Object.entries(catCounts).sort((a,b)=>b[1]-a[1]).map(([cat,n])=>`<div style="display:flex;justify-content:space-between;align-items:center;padding:5px 0;border-bottom:1px solid var(--tan-lt);font-size:13px"><span>${catInfo(cat).label}</span><span style="font-weight:600;color:var(--navy)">${n}</span></div>`).join('')}</div>
+    </div>
+  </div></div>`;
+}
+function previewAdminRemove(val){const id=val.trim().toUpperCase();const preview=document.getElementById('admin-remove-preview');if(!preview)return;if(!id){preview.innerHTML='';return;}const bk=bookById(id);if(!bk){preview.innerHTML='<span style="color:var(--muted)">Book not found</span>';return;}const copies=books.filter(b=>b.title===bk.title);const loan=activeLoans().find(l=>l.bookId===id);let msg=`<strong>${escH(bk.title)}</strong> &bull; ${bk.language} &bull; ${catInfo(bk.category).label}`;if(copies.length>1)msg+=`<br><span style="color:#e65100;font-weight:500">⚠ ${copies.length} copies of this title: ${copies.map(b=>b.id).join(', ')} — only removing ${id}</span>`;if(loan)msg+=`<br><span style="color:#b63a3a">⚠ Currently on loan to ${escH(loan.borrowerName)} — cannot remove</span>`;preview.innerHTML=msg;}
+function adminRemoveBook(){const id=document.getElementById('admin-remove-id').value.trim().toUpperCase();const bk=bookById(id);const preview=document.getElementById('admin-remove-preview');if(!bk){if(preview)preview.innerHTML='<span style="color:#b63a3a">Book ID not found.</span>';return;}const copies=books.filter(b=>b.title===bk.title);const activeLoad=activeLoans().find(l=>l.bookId===id);if(activeLoad){if(preview)preview.innerHTML=`<span style="color:#b63a3a">⚠ On loan to ${escH(activeLoad.borrowerName)}. Return it first.</span>`;return;}const confirmed=confirm('REMOVE BOOK FROM CATALOGUE\n\nBook: '+bk.title+'\nID: '+id+(copies.length>1?'\nCopies of this title: '+copies.length:'') +'\n\nOnly do this if the PHYSICAL BOOK no longer exists.\n\nIf you see two entries for the same title — those are TWO real books. Do NOT remove one.\n\nContinue?');if(!confirmed)return;books=books.filter(b=>b.id!==id);save();document.getElementById('admin-remove-id').value='';if(preview)preview.innerHTML=`<span style="color:#2a7a42">✓ ${escH(bk.title)} (${id}) removed.</span>`;renderAdmin();}
+function clearAllData(){if(!confirm('Delete ALL library data?\n\nThis removes all books, loans, and borrowers. Cannot be undone.\n\nExport your data first if needed.'))return;if(!confirm('Last chance — permanently delete everything?'))return;books=[];loans=[];borrowers=[];save();alert('All data cleared.');renderAdmin();}
+
+/* ══ VIRTUAL KEYBOARD ══ */
+const KBD_GURMUKHI={name:'ਪੰਜਾਬੀ',sections:[{label:'Consonants — ਵਿਅੰਜਨ',keys:['ੳ','ਅ','ੲ','ਸ','ਹ','ਕ','ਖ','ਗ','ਘ','ਙ','ਚ','ਛ','ਜ','ਝ','ਞ','ਟ','ਠ','ਡ','ਢ','ਣ','ਤ','ਥ','ਦ','ਧ','ਨ','ਪ','ਫ','ਬ','ਭ','ਮ','ਯ','ਰ','ਲ','ਵ','ੜ']},{label:'Vowel signs — ਮਾਤਰਾਂ',keys:['ਾ','ਿ','ੀ','ੁ','ੂ','ੇ','ੈ','ੋ','ੌ','ੰ','ੱ','ਂ','੍']},{label:'Additional',keys:['ਸ਼','ਖ਼','ਗ਼','ਜ਼','ਫ਼','੦','੧','੨','੩','੪','੫','੬','੭','੮','੯','।','॥']}]};
+const KBD_HINDI={name:'हिंदी',sections:[{label:'Vowels — स्वर',keys:['अ','आ','इ','ई','उ','ऊ','ए','ऐ','ओ','औ','ऋ','अं','अः']},{label:'Consonants — व्यंजन',keys:['क','ख','ग','घ','ङ','च','छ','ज','झ','ञ','ट','ठ','ड','ढ','ण','त','थ','द','ध','न','प','फ','ब','भ','म','य','र','ल','व','श','ष','स','ह','ड़','ढ़','क्ष','त्र','ज्ञ']},{label:'Vowel signs — मात्राएं',keys:['ा','ि','ी','ु','ू','े','ै','ो','ौ','ं','ः','्','ृ']},{label:'Numbers',keys:['०','१','२','३','४','५','६','७','८','९','।','॥']}]};
+let kbdTargetId=null,kbdLang='gu',kbdText='';
+function openKbd(targetInputId){kbdTargetId=targetInputId;const el=document.getElementById(targetInputId);kbdText=el?el.value:'';document.getElementById('kbd-overlay').classList.add('open');renderKbd();}
+function switchKbdLang(lang){kbdLang=lang;document.getElementById('kbdlang-gu').classList.toggle('active',lang==='gu');document.getElementById('kbdlang-hi').classList.toggle('active',lang==='hi');renderKbd();}
+function renderKbd(){const data=kbdLang==='gu'?KBD_GURMUKHI:KBD_HINDI;document.getElementById('kbd-preview').textContent=kbdText||'Start typing…';const container=document.getElementById('kbd-keys');container.innerHTML=data.sections.map(sec=>`<div class="kbd-sec">${sec.label}</div><div class="kbd-row">${sec.keys.map(k=>`<button class="kbd-key" onclick="kbdType('${k}')">${k}</button>`).join('')}</div>`).join('')+`<div class="kbd-row" style="margin-top:8px"><button class="kbd-key fn" onclick="kbdType(' ')">Space</button><button class="kbd-key fn" onclick="kbdBackspace()">⌫ Delete</button><button class="kbd-key fn" onclick="kbdClear()">Clear all</button></div>`;}
+function kbdType(char){kbdText+=char;document.getElementById('kbd-preview').textContent=kbdText;}
+function kbdBackspace(){kbdText=[...kbdText].slice(0,-1).join('');document.getElementById('kbd-preview').textContent=kbdText||'Start typing…';}
+function kbdClear(){kbdText='';document.getElementById('kbd-preview').textContent='Start typing…';}
+function closeKbd(apply){if(apply&&kbdTargetId){const el=document.getElementById(kbdTargetId);if(el)el.value=kbdText;}document.getElementById('kbd-overlay').classList.remove('open');}
+
+/* ══ TRANSLATION ══ */
+async function translateField(inputId,fromLang,toLang){const el=document.getElementById(inputId);if(!el||!el.value.trim()){alert('Enter some text in the field first.');return;}const original=el.value.trim();const statusId=inputId+'-tr-status';const statusEl=document.getElementById(statusId);if(statusEl){statusEl.textContent='Translating…';statusEl.style.color='var(--navy)';}try{const url=`https://api.mymemory.translated.net/get?q=${encodeURIComponent(original)}&langpair=${fromLang}|${toLang}`;const r=await fetch(url);const d=await r.json();const translated=d.responseData?.translatedText;if(translated&&translated!==original){el.value=translated;if(statusEl){statusEl.textContent='✓ Translated';statusEl.style.color='#2a7a42';}}else{if(statusEl){statusEl.textContent='Could not translate';statusEl.style.color='#b63a3a';}}}catch(e){if(statusEl){statusEl.textContent='Translation failed';statusEl.style.color='#b63a3a';}}}
+
+/* ══ COVER IMAGE ══ */
+let pendingCoverImage=null;
+function triggerCoverUpload(mode){const inp=document.getElementById('cover-file-input');inp.accept='image/*';inp.capture=mode==='camera'?'environment':'';inp.click();}
+function onCoverFileChange(e){const file=e.target.files[0];if(!file)return;const reader=new FileReader();reader.onload=ev=>{compressImage(ev.target.result,200,260,compressed=>{pendingCoverImage=compressed;renderCoverPreview();});};reader.readAsDataURL(file);}
+function compressImage(dataUrl,maxW,maxH,callback){const img=new Image();img.onload=()=>{const canvas=document.createElement('canvas');const scale=Math.min(maxW/img.width,maxH/img.height,1);canvas.width=Math.round(img.width*scale);canvas.height=Math.round(img.height*scale);canvas.getContext('2d').drawImage(img,0,0,canvas.width,canvas.height);callback(canvas.toDataURL('image/jpeg',0.75));};img.src=dataUrl;}
+function renderCoverPreview(){const area=document.getElementById('cover-preview-area');if(!area)return;if(pendingCoverImage){area.innerHTML=`<div style="display:flex;align-items:center;gap:12px"><img src="${pendingCoverImage}" class="cover-thumb" alt="Cover"><div><div style="font-size:13px;font-weight:500;color:#2a7a42">✓ Cover image ready</div><button class="btn btn-sm btn-danger" onclick="pendingCoverImage=null;renderCoverPreview()" style="margin-top:6px">Remove</button></div></div>`;}else{area.innerHTML=`<div class="cover-upload-area" onclick="triggerCoverUpload('file')"><div style="font-size:28px;margin-bottom:8px">📷</div><div style="font-size:13px;font-weight:500;color:var(--muted);margin-bottom:4px">Add cover photo</div><div style="font-size:12px;color:var(--muted);margin-bottom:10px">Click to upload or use camera on phone</div><div style="display:flex;gap:8px;justify-content:center;flex-wrap:wrap"><button class="btn btn-sm" onclick="event.stopPropagation();triggerCoverUpload('file')">📁 Choose file</button><button class="btn btn-sm scan-btn" onclick="event.stopPropagation();triggerCoverUpload('camera')">📷 Take photo</button></div></div>`;}}
+
+/* ══ MOBILE NAV ══ */
+const MOBILE_MAIN_TABS=['dashboard','catalog','addbook','checkout'];
+function updateMobileNav(tab){MOBILE_MAIN_TABS.forEach(t=>{const btn=document.getElementById('mn-'+t);if(btn)btn.classList.toggle('active',t===tab);});const moreBtn=document.getElementById('mn-more');if(moreBtn)moreBtn.classList.toggle('active',!MOBILE_MAIN_TABS.includes(tab));const odCount=activeLoans().filter(isOverdue).length;document.querySelectorAll('.mn-dot').forEach(d=>d.style.display=odCount?'block':'none');}
+function toggleMobileMore(){const menu=document.getElementById('mobile-more-menu');if(menu)menu.style.display=menu.style.display==='none'?'block':'none';}
+function showTabClose(tab){const menu=document.getElementById('mobile-more-menu');if(menu)menu.style.display='none';showTab(tab);}
+document.addEventListener('click',e=>{const menu=document.getElementById('mobile-more-menu');const moreBtn=document.getElementById('mn-more');if(menu&&moreBtn&&!menu.contains(e.target)&&!moreBtn.contains(e.target)){menu.style.display='none';}});
+
+
+
+
+
+
+/* ══ FETCH MISSING DETAILS FOR EXISTING BOOK ══ */
+async function fetchMissingDetails(id){
+  const b=bookById(id);
+  if(!b)return;
+  const btn=document.getElementById('fetch-btn-'+id);
+  const resultEl=document.getElementById('fetch-result-'+id);
+  if(btn){btn.textContent='Searching…';btn.disabled=true;}
+  if(resultEl)resultEl.innerHTML='';
+
+  // Build search query from what we have
+  const titleVal=document.getElementById('eb-title').value.trim()||b.title;
+  const authorVal=document.getElementById('eb-author').value.trim()||b.author||'';
+  const isbnVal=document.getElementById('eb-isbn').value.trim()||b.isbn||'';
+
+  let found=null;
+
+  // Try ISBN first if we have one — most accurate
+  if(isbnVal){
+    try{
+      const r=await fetch(`https://openlibrary.org/api/books?bibkeys=ISBN:${isbnVal.replace(/[-\s]/g,'')}&format=json&jscmd=data`);
+      const d=await r.json();
+      const key=Object.keys(d)[0];
+      if(key){
+        const ol=d[key];
+        found={
+          title:ol.title||'',
+          authors:(ol.authors||[]).map(a=>a.name).join(', '),
+          publisher:(ol.publishers||[]).map(p=>p.name).join(', '),
+          year:ol.publish_date||'',
+          cover:ol.cover?ol.cover.medium||ol.cover.small||'':'',
+          source:'Open Library (ISBN)',
+          subjects:(ol.subjects||[]).map(s=>s.name||s)
+        };
+      }
+    }catch(e){}
+  }
+
+  // Try Google Books by title+author
+  if(!found||!found.cover){
+    try{
+      const q=encodeURIComponent((titleVal+' '+authorVal).trim());
+      const r=await fetch(`https://www.googleapis.com/books/v1/volumes?q=${q}&maxResults=5&printType=books`);
+      const d=await r.json();
+      if(d.items&&d.items.length>0){
+        // Find best match — prefer exact title match
+        const match=d.items.find(item=>{
+          const t=(item.volumeInfo.title||'').toLowerCase();
+          return t===titleVal.toLowerCase()||t.includes(titleVal.toLowerCase().split(' ')[0]);
+        })||d.items[0];
+        const v=match.volumeInfo;
+        const imgs=v.imageLinks||{};
+        const cover=(imgs.thumbnail||imgs.smallThumbnail||'').replace('http://','https://');
+        const ids=v.industryIdentifiers||[];
+        const isbn=(ids.find(i=>i.type==='ISBN_13')||ids.find(i=>i.type==='ISBN_10')||{}).identifier||'';
+        if(!found){
+          found={
+            title:v.title||'',
+            authors:(v.authors||[]).join(', '),
+            publisher:v.publisher||'',
+            year:(v.publishedDate||'').split('-')[0],
+            cover,isbn,
+            source:'Google Books',
+            subjects:v.categories||[]
+          };
+        } else if(!found.cover&&cover){
+          found.cover=cover;
+          found.source+=' + Google Books cover';
+        }
+        if(!found.isbn&&isbn) found.isbn=isbn;
+      }
+    }catch(e){}
+  }
+
+  if(btn){btn.textContent='🔍 Fetch missing details';btn.disabled=false;}
+
+  if(!found){
+    if(resultEl)resultEl.innerHTML='<div class="msg-warn">Could not find this book online. Try editing the title to be more specific, then try again.</div>';
+    return;
+  }
+
+  // Show what was found and offer to apply
+  const updates=[];
+  const currentTitle=document.getElementById('eb-title').value.trim();
+  const currentAuthor=document.getElementById('eb-author').value.trim();
+  const currentPub=document.getElementById('eb-pub').value.trim();
+  const currentYear=document.getElementById('eb-year').value.trim();
+  const currentISBN=document.getElementById('eb-isbn').value.trim();
+
+  if(found.cover) updates.push({field:'cover',label:'Cover photo',value:found.cover});
+  if(found.title&&!currentTitle) updates.push({field:'title',label:'Title',value:found.title});
+  if(found.authors&&!currentAuthor) updates.push({field:'author',label:'Author',value:found.authors});
+  if(found.publisher&&!currentPub) updates.push({field:'publisher',label:'Publisher',value:found.publisher});
+  if(found.year&&!currentYear) updates.push({field:'year',label:'Year',value:found.year});
+  if(found.isbn&&!currentISBN) updates.push({field:'isbn',label:'ISBN',value:found.isbn});
+
+  // Also check category
+  const guessedCat=guessCategoryFromBook(found.title||titleVal, found.authors||authorVal, found.subjects||[]);
+  const currentCat=document.getElementById('eb-cat').value;
+  if(guessedCat&&guessedCat!==currentCat){
+    const guessedLabel=catInfo(guessedCat).label;
+    updates.push({field:'cat',label:'Category suggestion',value:guessedCat,display:guessedLabel});
+  }
+
+  if(updates.length===0){
+    if(resultEl)resultEl.innerHTML=`<div class="msg-ok">✓ Found on ${found.source} — all fields already filled in. Nothing new to add.</div>`;
+    return;
+  }
+
+  // Store found data for apply function
+  window._fetchedBookData={id,found,updates};
+
+  // Build rows with individual checkboxes
+  let updateRows='';
+  updates.forEach((u,i)=>{
+    const previewHTML=u.field==='cover'&&u.value
+      ?`<img src="${u.value}" style="width:32px;height:42px;object-fit:cover;border-radius:4px;flex-shrink:0" onerror="this.style.display='none'">`
+      :`<div style="width:32px;height:42px;background:var(--tan-lt);border-radius:4px;flex-shrink:0;display:flex;align-items:center;justify-content:center;font-size:16px">📝</div>`;
+    // Pre-check everything EXCEPT category suggestions
+    const checked=u.field!=='cat'?'checked':'';
+    const catNote=u.field==='cat'?'<div style="font-size:11px;color:var(--muted);margin-top:2px">Unchecked by default — verify before applying</div>':'';
+    updateRows+=`<label style="display:flex;align-items:center;gap:10px;padding:10px 0;border-bottom:1px solid var(--border);cursor:pointer">
+      <input type="checkbox" id="fetch-check-${i}" ${checked} style="width:18px;height:18px;flex-shrink:0;accent-color:var(--gold)">
+      ${previewHTML}
+      <div style="flex:1">
+        <div style="font-size:11px;color:var(--muted);font-weight:700;text-transform:uppercase;letter-spacing:.05em">${u.label}</div>
+        <div style="font-size:13px;color:var(--text)">${escH(u.display||String(u.value).slice(0,80))}</div>
+        ${catNote}
+      </div>
+    </label>`;
+  });
+
+  if(resultEl)resultEl.innerHTML=`
+    <div style="background:var(--gold-lt);border:1.5px solid var(--gold);border-radius:var(--radius-sm);padding:14px 16px">
+      <div style="font-size:13px;font-weight:600;color:var(--navy);margin-bottom:4px">Found on ${found.source} — tick what you want to apply:</div>
+      <div style="font-size:12px;color:var(--muted);margin-bottom:10px">Cover, publisher, year etc. are ticked by default. Category is unticked — check it's correct before applying.</div>
+      ${updateRows}
+      <div style="display:flex;gap:8px;margin-top:14px;flex-wrap:wrap">
+        <button class="btn btn-primary" style="flex:1;min-width:120px" onclick="applyFetchedDetails()">Apply selected</button>
+        <button class="btn btn-sm" onclick="document.querySelectorAll('[id^=fetch-check-]').forEach(c=>c.checked=true)" style="white-space:nowrap">Select all</button>
+        <button class="btn btn-sm" onclick="document.querySelectorAll('[id^=fetch-check-]').forEach(c=>c.checked=false)" style="white-space:nowrap">Clear all</button>
+        <button class="btn btn-sm" onclick="document.getElementById('fetch-result-${id}').innerHTML=''">Dismiss</button>
+      </div>
+    </div>`;
+}
+
+function applyFetchedDetails(){
+  const data=window._fetchedBookData;
+  if(!data)return;
+  const {id,found,updates}=data;
+  const resultEl=document.getElementById('fetch-result-'+id);
+
+  // Only apply items that are checked
+  const checkedUpdates=updates.filter((_,i)=>{
+    const cb=document.getElementById('fetch-check-'+i);
+    return cb&&cb.checked;
+  });
+
+  if(checkedUpdates.length===0){
+    if(resultEl)resultEl.innerHTML='<div class="msg-warn">Nothing selected — tick at least one item to apply.</div>';
+    return;
+  }
+
+  checkedUpdates.forEach(u=>{
+    if(u.field==='cover'&&found.cover){
+      fetch(found.cover).then(r=>r.blob()).then(blob=>{
+        const reader=new FileReader();
+        reader.onload=ev=>{
+          compressImage(ev.target.result,200,260,compressed=>{
+            // Save directly to book
+            const b=bookById(id);
+            if(b){b.coverImage=compressed;save();}
+            // Also update pending for cover preview area if visible
+            pendingCoverImage=compressed;
+            const cp=document.getElementById('cover-preview-area');
+            if(cp)renderCoverPreview();
+          });
+        };
+        reader.readAsDataURL(blob);
+      }).catch(()=>{});
+    }
+    else if(u.field==='title'){const el=document.getElementById('eb-title');if(el)el.value=u.value;}
+    else if(u.field==='author'){const el=document.getElementById('eb-author');if(el)el.value=u.value;}
+    else if(u.field==='publisher'){const el=document.getElementById('eb-pub');if(el)el.value=u.value;}
+    else if(u.field==='year'){const el=document.getElementById('eb-year');if(el)el.value=u.value;}
+    else if(u.field==='isbn'){const el=document.getElementById('eb-isbn');if(el)el.value=u.value;}
+    else if(u.field==='cat'){
+      const sel=document.getElementById('eb-cat');
+      if(sel){
+        sel.value=u.value;
+        sel.style.borderColor='var(--gold)';
+        sel.style.background='var(--gold-lt)';
+        setTimeout(()=>{sel.style.borderColor='';sel.style.background='';},2000);
+      }
+    }
+  });
+
+  if(resultEl)resultEl.innerHTML=`<div class="msg-ok">✓ ${checkedUpdates.length} item${checkedUpdates.length!==1?'s':''} applied — review and click Save changes to confirm.</div>`;
+  window._fetchedBookData=null;
+}
+
+
+function renderWishlist(){
+  const el=document.getElementById('pg-wishlist');
+  el.innerHTML=`
+  ${wishMsg?`<div class="${wishMsg.ok?'msg-ok':'msg-err'}" id="wl-flash">${wishMsg.text}</div>`:''}
+  <div style="display:flex;gap:6px;margin-bottom:18px">
+    <button id="wl-tab-wish" onclick="switchWlTab('wish')" class="btn btn-primary" style="border-radius:20px;font-size:13px">📋 Library Wish List</button>
+    <button id="wl-tab-sale" onclick="switchWlTab('sale')" class="btn" style="border-radius:20px;font-size:13px">🏷 Books for Sale</button>
+  </div>
+  <div id="wl-panel-wish"></div>
+  <div id="wl-panel-sale" style="display:none"></div>`;
+  renderWishPanel();
+  renderSalePanel();
+  setTimeout(()=>{const f=document.getElementById('wl-flash');if(f&&f.remove)setTimeout(()=>f.remove(),3000);},100);
+  wishMsg='';
+}
+
+function switchWlTab(tab){
+  document.getElementById('wl-panel-wish').style.display=tab==='wish'?'block':'none';
+  document.getElementById('wl-panel-sale').style.display=tab==='sale'?'block':'none';
+  const wb=document.getElementById('wl-tab-wish');
+  const sb=document.getElementById('wl-tab-sale');
+  if(wb){wb.className=tab==='wish'?'btn btn-primary':'btn';wb.style.borderRadius='20px';wb.style.fontSize='13px';}
+  if(sb){sb.className=tab==='sale'?'btn btn-primary':'btn';sb.style.borderRadius='20px';sb.style.fontSize='13px';}
+}
+
+function renderWishPanel(){
+  const el=document.getElementById('wl-panel-wish');
+  if(!el)return;
+  const total=wishlist.length;
+  const totalCost=wishlist.reduce((s,w)=>s+(w.price||0),0);
+  const acquired=wishlist.filter(w=>w.acquired).length;
+  el.innerHTML=`
+  <div class="two-col" style="align-items:start">
+    <div>
+      <div class="section-title">Add book to wish list</div>
+      <div class="card">
+        <div style="font-size:13px;color:var(--muted);margin-bottom:14px;line-height:1.6">Books the library wants to purchase for the collection. Share this list with the committee for budget approval.</div>
+        <div class="form-full"><label>Title *</label><input type="text" id="wl-title" placeholder="Book title" style="font-family:'Noto Sans Gurmukhi','Noto Sans Devanagari',sans-serif"></div>
+        <div class="form-full"><label>Author</label><input type="text" id="wl-author" placeholder="Author name"></div>
+        <div class="form-row">
+          <div><label>Category</label>
+            <select id="wl-cat"><option value="">— Select —</option>${['Sikh Scriptures','Sikh Studies','Literature','General','Children & Youth','Other'].map(g=>`<optgroup label="— ${g} —">${CATS.filter(c=>c.g===g).map(c=>`<option value="${c.id}">${c.label}</option>`).join('')}</optgroup>`).join('')}</select>
+          </div>
+          <div><label>Language</label><select id="wl-lang"><option value="">— Select —</option>${LANGS.map(l=>`<option>${l}</option>`).join('')}</select></div>
+        </div>
+        <div class="form-row">
+          <div><label>Estimated price (CAD $)</label><input type="number" id="wl-price" placeholder="e.g. 25.00" min="0" step="0.01"></div>
+          <div><label>Where to buy</label><input type="text" id="wl-source" placeholder="e.g. Amazon, Singh Brothers"></div>
+        </div>
+        <div class="form-full"><label>Notes / reason</label><input type="text" id="wl-notes" placeholder="e.g. Requested by sangat, replace damaged copy"></div>
+        <div class="action-row"><button class="btn btn-primary" onclick="addToWishlist()">Add to wish list</button></div>
+      </div>
+    </div>
+    <div>
+      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:12px;flex-wrap:wrap;gap:8px">
+        <div class="section-title" style="margin-bottom:0">Wish list (${total})</div>
+        <div style="display:flex;gap:8px;align-items:center">
+          ${total?`<span style="font-size:12px;color:var(--muted)">${acquired} acquired &bull; <strong>$${totalCost.toFixed(2)}</strong> total</span>`:''}
+          ${total?`<button class="btn btn-sm" onclick="exportWishlistCSV()">Export CSV</button>`:''}
+        </div>
+      </div>
+      ${wishlist.length?wishlist.map((w,i)=>`
+      <div class="card" style="${w.acquired?'opacity:.55;':''}border-left:4px solid ${w.acquired?'#2a7a42':'var(--gold)'}">
+        <div style="display:flex;align-items:flex-start;gap:10px">
+          <div style="flex:1;min-width:0">
+            <div style="font-size:14px;font-weight:600;font-family:'Noto Sans Gurmukhi','Noto Sans Devanagari',sans-serif">${escH(w.title)}</div>
+            ${w.author?`<div style="font-size:12px;color:var(--muted);margin-top:1px">${escH(w.author)}</div>`:''}
+            <div style="display:flex;gap:5px;flex-wrap:wrap;margin-top:6px">
+              ${w.cat?`<span class="badge b-lang">${catInfo(w.cat).label}</span>`:''}
+              ${w.price?`<span class="badge" style="background:var(--gold-lt);color:var(--gold-dark);border:1px solid var(--gold-mid)">$${w.price.toFixed(2)} CAD</span>`:''}
+              ${w.acquired?`<span class="badge b-in">✓ Acquired</span>`:''}
+            </div>
+            ${w.source?`<div style="font-size:12px;color:var(--muted);margin-top:4px">📍 ${escH(w.source)}</div>`:''}
+            ${w.notes?`<div style="font-size:12px;color:var(--muted);font-style:italic;margin-top:2px">${escH(w.notes)}</div>`:''}
+          </div>
+          <div style="display:flex;flex-direction:column;gap:6px;align-items:flex-end;flex-shrink:0">
+            ${!w.acquired?`<button class="btn btn-sm" style="background:#e6f4ea;border-color:#b7dfc0;color:#2a7a42;white-space:nowrap" onclick="markWishlistAcquired(${i})">✓ Acquired</button>`:''}
+            <button class="btn btn-sm btn-danger" onclick="removeFromWishlist(${i})">×</button>
+          </div>
+        </div>
+      </div>`).join(''):`<div class="empty" style="padding:40px">No books on the wish list yet.</div>`}
+    </div>
+  </div>`;
+}
+
+function renderSalePanel(){
+  const el=document.getElementById('wl-panel-sale');
+  if(!el)return;
+  const forSale=saleItems||[];
+  const totalVal=forSale.reduce((s,i)=>s+(i.price||0),0);
+  el.innerHTML=`
+  <div class="two-col" style="align-items:start">
+    <div>
+      <div class="section-title">Add book for sale</div>
+      <div class="card">
+        <div style="font-size:13px;color:var(--muted);margin-bottom:14px;line-height:1.6">Books available for the sangat to purchase — surplus copies, donated duplicates, or books the library is retiring. Sangat can browse this list and pay at the desk.</div>
+        <div class="form-full"><label>Title *</label><input type="text" id="sl-title" placeholder="Book title" style="font-family:'Noto Sans Gurmukhi','Noto Sans Devanagari',sans-serif"></div>
+        <div class="form-full"><label>Author</label><input type="text" id="sl-author" placeholder="Author name"></div>
+        <div class="form-row">
+          <div><label>Selling price (CAD $) *</label><input type="number" id="sl-price" placeholder="e.g. 10.00" min="0" step="0.01"></div>
+          <div><label>Condition</label>
+            <select id="sl-cond"><option>New</option><option selected>Good</option><option>Fair</option><option>Worn</option></select>
+          </div>
+        </div>
+        <div class="form-row">
+          <div><label>Quantity available</label><input type="number" id="sl-qty" value="1" min="1" max="99"></div>
+          <div><label>Language</label><select id="sl-lang"><option value="">— Select —</option>${LANGS.map(l=>`<option>${l}</option>`).join('')}</select></div>
+        </div>
+        <div class="form-full"><label>Notes</label><input type="text" id="sl-notes" placeholder="e.g. Surplus copy, donated duplicate, slight wear on cover"></div>
+        <div class="action-row"><button class="btn btn-primary" onclick="addToSale()">Add for sale</button></div>
+      </div>
+    </div>
+    <div>
+      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:12px;flex-wrap:wrap;gap:8px">
+        <div class="section-title" style="margin-bottom:0">For sale (${forSale.length})</div>
+        <div style="display:flex;gap:8px;align-items:center">
+          ${forSale.length?`<span style="font-size:12px;color:var(--muted)">Total value: <strong>$${totalVal.toFixed(2)}</strong></span>`:''}
+          ${forSale.length?`<button class="btn btn-sm" onclick="exportSaleCSV()">Export CSV</button>`:''}
+        </div>
+      </div>
+      ${forSale.length?forSale.map((item,i)=>`
+      <div class="card" style="${item.sold?'opacity:.5;':''}border-left:4px solid ${item.sold?'#2a7a42':'var(--navy)'}">
+        <div style="display:flex;align-items:flex-start;gap:10px">
+          <div style="flex:1;min-width:0">
+            <div style="font-size:14px;font-weight:600;font-family:'Noto Sans Gurmukhi','Noto Sans Devanagari',sans-serif">${escH(item.title)}</div>
+            ${item.author?`<div style="font-size:12px;color:var(--muted);margin-top:1px">${escH(item.author)}</div>`:''}
+            <div style="display:flex;gap:5px;flex-wrap:wrap;margin-top:6px">
+              <span class="badge" style="background:var(--navy);color:#fff;font-size:12px">$${(item.price||0).toFixed(2)} CAD</span>
+              <span class="badge b-lang">${item.cond||'Good'}</span>
+              ${item.qty>1?`<span class="badge" style="background:var(--sky-lt);color:var(--navy);border:1px solid var(--sky)">${item.qty} copies</span>`:''}
+              ${item.lang?`<span class="badge b-lang">${item.lang}</span>`:''}
+              ${item.sold?`<span class="badge b-in">✓ Sold</span>`:''}
+            </div>
+            ${item.notes?`<div style="font-size:12px;color:var(--muted);font-style:italic;margin-top:4px">${escH(item.notes)}</div>`:''}
+          </div>
+          <div style="display:flex;flex-direction:column;gap:6px;align-items:flex-end;flex-shrink:0">
+            ${!item.sold?`<button class="btn btn-sm" style="background:#e6f4ea;border-color:#b7dfc0;color:#2a7a42;white-space:nowrap" onclick="markSaleItemSold(${i})">✓ Mark sold</button>`:''}
+            <button class="btn btn-sm btn-danger" onclick="removeSaleItem(${i})">×</button>
+          </div>
+        </div>
+      </div>`).join(''):`<div class="empty" style="padding:40px">No books listed for sale yet.<br><br>Add surplus or donated books that the sangat can purchase.</div>`}
+    </div>
+  </div>`;
+}
+
+
+function addToWishlist(){
+  const title=document.getElementById('wl-title').value.trim();
+  if(!title){wishMsg={ok:false,text:'Title is required.'};renderWishlist();return;}
+  const price=parseFloat(document.getElementById('wl-price').value)||0;
+  wishlist.unshift({
+    id:'WL-'+Date.now(),
+    title,
+    author:document.getElementById('wl-author').value.trim(),
+    cat:document.getElementById('wl-cat').value,
+    lang:document.getElementById('wl-lang').value,
+    price,
+    source:document.getElementById('wl-source').value.trim(),
+    notes:document.getElementById('wl-notes').value.trim(),
+    addedDate:new Date().toISOString().split('T')[0],
+    acquired:false
+  });
+  saveWishlist();
+  wishMsg={ok:true,text:`✓ "${title}" added to wish list.`};
+  renderWishlist();
+}
+
+function markWishlistAcquired(i){
+  if(wishlist[i])wishlist[i].acquired=true;
+  saveWishlist();
+  renderWishlist();
+}
+
+function removeFromWishlist(i){
+  if(!confirm('Remove from wish list?'))return;
+  wishlist.splice(i,1);
+  saveWishlist();
+  renderWishlist();
+}
+
+function exportWishlistCSV(){
+  const rows=[['Title','Author','Category','Language','Est. Price (CAD)','Where to Buy','Notes','Added','Acquired']];
+  wishlist.forEach(w=>rows.push([w.title,w.author||'',w.cat?catInfo(w.cat).label:'',w.lang||'',w.price||'',w.source||'',w.notes||'',w.addedDate,w.acquired?'Yes':'No']));
+  const csv=rows.map(r=>r.map(c=>'"'+(String(c).replace(/"/g,'""'))+'"').join(',')).join('\n');
+  const blob=new Blob(['\uFEFF'+csv],{type:'text/csv;charset=utf-8'});
+  const url=URL.createObjectURL(blob);
+  const a=document.createElement('a');a.href=url;a.download='library_wishlist.csv';a.click();URL.revokeObjectURL(url);
+}
+
+
+/* ══ WISH LIST STORAGE ══ */
+let wishlist=[];
+let wishMsg='';
+
+function saveWishlist(){
+  try{localStorage.setItem('gw_wishlist',JSON.stringify(wishlist));}catch(e){}
+}
+function loadWishlist(){
+  try{const w=localStorage.getItem('gw_wishlist');if(w)wishlist=JSON.parse(w);}catch(e){}
+}
+
+/* ══ SALE ITEMS ══ */
+let saleItems=[];
+
+function saveSaleItems(){
+  try{localStorage.setItem('gw_sale',JSON.stringify(saleItems));}catch(e){}
+}
+function loadSaleItems(){
+  try{const s=localStorage.getItem('gw_sale');if(s)saleItems=JSON.parse(s);}catch(e){}
+}
+
+function addToSale(){
+  const title=document.getElementById('sl-title').value.trim();
+  if(!title){wishMsg={ok:false,text:'Title is required.'};renderWishlist();switchWlTab('sale');return;}
+  const price=parseFloat(document.getElementById('sl-price').value)||0;
+  saleItems.unshift({
+    id:'SL-'+Date.now(),
+    title,
+    author:document.getElementById('sl-author').value.trim(),
+    price,
+    cond:document.getElementById('sl-cond').value,
+    qty:parseInt(document.getElementById('sl-qty').value)||1,
+    lang:document.getElementById('sl-lang').value,
+    notes:document.getElementById('sl-notes').value.trim(),
+    addedDate:new Date().toISOString().split('T')[0],
+    sold:false
+  });
+  saveSaleItems();
+  wishMsg={ok:true,text:`✓ "${title}" listed for sale at $${price.toFixed(2)} CAD.`};
+  renderWishlist();switchWlTab('sale');
+}
+
+function markSaleItemSold(i){
+  if(saleItems[i])saleItems[i].sold=true;
+  saveSaleItems();renderSalePanel();
+}
+
+function removeSaleItem(i){
+  if(!confirm('Remove this item from the sale list?'))return;
+  saleItems.splice(i,1);
+  saveSaleItems();renderSalePanel();
+}
+
+function exportSaleCSV(){
+  const rows=[['Title','Author','Price (CAD)','Condition','Qty','Language','Notes','Date Added','Sold']];
+  saleItems.forEach(i=>rows.push([i.title,i.author||'',i.price||'',i.cond||'',i.qty||1,i.lang||'',i.notes||'',i.addedDate,i.sold?'Yes':'No']));
+  const csv=rows.map(r=>r.map(c=>'"'+(String(c).replace(/"/g,'""'))+'"').join(',')).join('\n');
+  const blob=new Blob(['\uFEFF'+csv],{type:'text/csv;charset=utf-8'});
+  const url=URL.createObjectURL(blob);const a=document.createElement('a');a.href=url;a.download='library_for_sale.csv';a.click();URL.revokeObjectURL(url);
+}
+
+
+/* ══ BARCODE SCANNER ══ */
+let scannerCallback=null, html5Scanner=null;
+function openScanner(onResult){scannerCallback=onResult;document.getElementById('scanner-overlay').classList.add('open');document.getElementById('scanner-status').textContent='Starting camera…';document.getElementById('scanner-manual-input').value='';setTimeout(startHtml5Scanner,200);}
+function startHtml5Scanner(){if(html5Scanner){html5Scanner.clear().catch(()=>{});html5Scanner=null;}if(typeof Html5Qrcode==='undefined'){document.getElementById('scanner-status').textContent='Scanner unavailable — type below.';return;}html5Scanner=new Html5Qrcode('scanner-reader');const config={fps:10,qrbox:{width:260,height:140},aspectRatio:1.5,formatsToSupport:[Html5QrcodeSupportedFormats.EAN_13,Html5QrcodeSupportedFormats.EAN_8,Html5QrcodeSupportedFormats.CODE_128,Html5QrcodeSupportedFormats.CODE_39,Html5QrcodeSupportedFormats.UPC_A,Html5QrcodeSupportedFormats.UPC_E,Html5QrcodeSupportedFormats.QR_CODE]};html5Scanner.start({facingMode:'environment'},config,(decodedText)=>{document.getElementById('scanner-status').textContent='✓ Got: '+decodedText;closeScanner(decodedText);},()=>{}).then(()=>{document.getElementById('scanner-status').textContent='Point camera at barcode…';}).catch(err=>{document.getElementById('scanner-status').textContent='Camera blocked — check browser permissions, or type below.';console.warn('Scanner:',err);});}
+function closeScanner(result){if(html5Scanner){html5Scanner.stop().then(()=>{html5Scanner.clear();html5Scanner=null;}).catch(()=>{html5Scanner=null;});}document.getElementById('scanner-overlay').classList.remove('open');if(result&&scannerCallback)scannerCallback(result);scannerCallback=null;}
+function scannerManualSubmit(){const val=document.getElementById('scanner-manual-input').value.trim();if(val)closeScanner(val);}
+function scanISBN(){openScanner(val=>{const isbn=val.replace(/[-\s]/g,'');const el=document.getElementById('isbn-in');if(el){el.value=isbn;doLookup();}});}
+function scanBookId(){openScanner(val=>{const el=document.getElementById('co-bid');if(el){el.value=val.toUpperCase();previewBook(val.toUpperCase());}});}
+function scanReturnId(){openScanner(val=>{const id=val.trim().toUpperCase();const loan=activeLoans().find(l=>l.bookId===id);if(loan){loan.returned=true;loan.returnedDate=new Date().toISOString().split('T')[0];save();coMsg={ok:true,text:`✓ "${bookById(id)?bookById(id).title:id}" returned.`};renderCheckout();}else{const el=document.getElementById('ret-id');if(el)el.value=id;coMsg={ok:false,text:'No active loan found for Book ID: '+id};renderCheckout();}});}
+
+/* ══ BARCODE GENERATION ══ */
+function renderBarcodeFor(id,svgId){const el=document.getElementById(svgId);if(el)try{JsBarcode(el,id,{format:'CODE128',width:1.4,height:32,displayValue:false,margin:2});}catch(e){}}
+
+/* ══ TRANSLATION ══ */
+
+/* ══ COVER IMAGE ══ */
+
+/* ══ VIRTUAL KEYBOARD ══ */
+
+/* ══ MOBILE NAV ══ */
+document.addEventListener('click',e=>{const menu=document.getElementById('mobile-more-menu');const moreBtn=document.getElementById('mn-more');if(menu&&moreBtn&&!menu.contains(e.target)&&!moreBtn.contains(e.target)){menu.style.display='none';}});
+
+/* ══ UTILITIES ══ */
+function escH(s){return String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');}
+
+/* ══ FIREBASE SYNC ══ */
+async function fbSyncPush(){
+  const btn=document.getElementById('sync-btn');
+  if(btn){btn.textContent='☁ Syncing…';btn.disabled=true;}
+  setSyncStatus('Pushing to shared database…',null);
+  try{
+    await Promise.all([fbSave('books',books),fbSave('loans',loans),fbSave('borrowers',borrowers)]);
+    setSyncStatus('✓ Pushed '+books.length+' books to shared database',true);
+  }catch(e){setSyncStatus('Sync failed: '+e.message,false);}
+  if(btn){btn.textContent='☁ Sync to shared database';btn.disabled=false;}
+}
+async function fbSyncPull(){
+  setSyncStatus('Loading from shared database…',null);
+  try{
+    const [fbBooks,fbLoans,fbBorr]=await Promise.all([fbLoad('books'),fbLoad('loans'),fbLoad('borrowers')]);
+    let updated=false;
+    if(fbBooks&&fbBooks.length>0){books=fbBooks;loadCoversLocally();updated=true;}
+    if(fbLoans&&fbLoans.length>0){loans=fbLoans;updated=true;}
+    if(fbBorr&&fbBorr.length>0){borrowers=fbBorr;updated=true;}
+    if(updated){
+      try{localStorage.setItem('gw_books',JSON.stringify(books));localStorage.setItem('gw_loans',JSON.stringify(loans));localStorage.setItem('gw_borrowers',JSON.stringify(borrowers));}catch(e){}
+      renderDash();
+      setSyncStatus('✓ Loaded '+books.length+' books from shared database',true);
+    }else{
+      setSyncStatus(books.length>0?books.length+' books (local) — click Sync to share with other devices':'Database empty — add books then click Sync',null);
+    }
+  }catch(e){setSyncStatus('Working offline',false);}
+}
+function setSyncStatus(msg,ok){
+  const el=document.getElementById('sync-status');
+  if(el){el.textContent=msg;el.style.color=ok===true?'#2a7a42':ok===false?'#b63a3a':'var(--muted)';}
+}
+
+/* ══ INIT ══ */
+load();
+loadWishlist();
+loadSaleItems();
+renderDash();
+setTimeout(fbSyncPull,800);
+</script>
+</body>
+</html>
