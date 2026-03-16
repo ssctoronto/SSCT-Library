@@ -612,81 +612,55 @@ pre.code-block{
 <script>
 /* ── FIREBASE REST API (no SDK needed) ── */
 const FB_PROJECT = 'ssct-library';
-const FB_BASE = `https://firestore.googleapis.com/v1/projects/${FB_PROJECT}/databases/(default)/documents/library`;
+const FB_BASE = `https://firestore.googleapis.com/v1/projects/${FB_PROJECT}/databases/(default)/documents`;
 
 async function fbSave(collection, dataArray) {
-  try {
-    // First load what's already in Firebase
-    const existing = await fbLoad(collection) || [];
-    // Merge: combine existing + new, deduplicate by id
-    const merged = [...existing];
-    const toStore = collection === 'books'
-      ? dataArray.map(item => ({...item, coverImage: null}))
-      : dataArray;
-    toStore.forEach(newItem => {
-      const idx = merged.findIndex(e => e.id === newItem.id);
-      if(idx >= 0) merged[idx] = newItem; // update existing
-      else merged.push(newItem); // add new
-    });
-    const body = {
-      fields: {
-        data: { stringValue: JSON.stringify(merged) },
-        updated: { integerValue: Date.now().toString() }
-      }
-    };
-    const r = await fetch(`${FB_BASE}/${collection}?updateMask.fieldPaths=data&updateMask.fieldPaths=updated`, {
-      method: 'PATCH',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify(body)
-    });
-    if (!r.ok) throw new Error('HTTP ' + r.status);
-    // Update local data with merged result
-    if(collection==='books'){books=merged;loadCoversLocally();}
-    else if(collection==='loans') loans=merged;
-    else if(collection==='borrowers') borrowers=merged;
-    return true;
-  } catch(e) {
-    console.warn('Firebase save failed:', e.message);
-    return false;
+  // Each item stored as individual document - safe, no overwrites possible
+  const toStore = collection === 'books'
+    ? dataArray.map(item => ({...item, coverImage: null}))
+    : dataArray;
+  let ok = true;
+  for(const item of toStore) {
+    if(!item.id) continue;
+    try {
+      // Convert item to Firestore field format
+      const fields = {};
+      Object.entries(item).forEach(([k,v]) => {
+        if(v === null || v === undefined) fields[k] = {nullValue: null};
+        else if(typeof v === 'boolean') fields[k] = {booleanValue: v};
+        else if(typeof v === 'number') fields[k] = {integerValue: String(v)};
+        else fields[k] = {stringValue: String(v)};
+      });
+      const r = await fetch(`${FB_BASE}/${collection}/${item.id}`, {
+        method: 'PATCH',
+        headers: {'Content-Type': 'application/json'},
+        body: JSON.stringify({fields})
+      });
+      if(!r.ok) { console.warn(`fbSave ${collection}/${item.id}: HTTP ${r.status}`); ok = false; }
+    } catch(e) { console.warn(`fbSave ${collection}/${item.id}:`, e.message); ok = false; }
   }
-}
-
-async function fbSyncPush(){
-  const btn=document.getElementById('sync-btn');
-  if(btn){btn.textContent='☁ Syncing…';btn.disabled=true;}
-  setSyncStatus('Pushing to shared database…',null);
-  try{
-    // Try a test GET first to check connectivity and permissions
-    const testR=await fetch(`${FB_BASE}/books`);
-    if(testR.status===403){
-      setSyncStatus('❌ Permission denied — go to Firebase → Firestore → Rules and make sure allow read, write: if true is published',false);
-      if(btn){btn.textContent='☁ Push to database';btn.disabled=false;}
-      return;
-    }
-    const [r1,r2,r3]=await Promise.all([fbSave('books',books),fbSave('loans',loans),fbSave('borrowers',borrowers)]);
-    if(r1&&r2&&r3){
-      setSyncStatus('✓ Pushed '+books.length+' books, '+borrowers.length+' borrowers to shared database',true);
-    }else{
-      setSyncStatus('⚠ Partial save — some data may not have synced. Check Firebase rules.',false);
-    }
-  }catch(e){
-    setSyncStatus('❌ Cannot reach database: '+e.message,false);
-    console.error('Push error:',e);
-  }
-  if(btn){btn.textContent='☁ Push to database';btn.disabled=false;}
+  return ok;
 }
 
 async function fbLoad(collection) {
   try {
     const r = await fetch(`${FB_BASE}/${collection}`);
-    if (r.status === 404) return null; // doc doesn't exist yet
-    if (!r.ok) throw new Error('HTTP ' + r.status);
-    const doc = await r.json();
-    const dataStr = doc?.fields?.data?.stringValue;
-    if (!dataStr) return null;
-    return JSON.parse(dataStr);
+    if(r.status === 404) return [];
+    if(!r.ok) throw new Error(`HTTP ${r.status}`);
+    const d = await r.json();
+    if(!d.documents) return [];
+    return d.documents.map(doc => {
+      const item = {};
+      Object.entries(doc.fields || {}).forEach(([k,v]) => {
+        if(v.stringValue !== undefined) item[k] = v.stringValue;
+        else if(v.integerValue !== undefined) item[k] = Number(v.integerValue);
+        else if(v.booleanValue !== undefined) item[k] = v.booleanValue;
+        else item[k] = null;
+      });
+      return item;
+    });
   } catch(e) {
-    console.warn('Firebase load failed:', e.message);
+    console.warn('fbLoad failed:', e.message);
     return null;
   }
 }
