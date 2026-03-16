@@ -772,6 +772,10 @@ function showTab(tab){
   document.querySelectorAll('.page').forEach(p=>p.classList.remove('active'));
   const pg=document.getElementById('pg-'+tab);if(pg)pg.classList.add('active');
   ({dashboard:renderDash,catalog:renderCatalog,addbook:renderAddBook,borrowers:renderBorrowers,lending:renderLending,overdues:renderOverdues,checkout:renderCheckout,labels:renderLabels,libcards:renderLibCards,admin:renderAdmin,wishlist:renderWishlist})[tab]?.();
+  // Auto-pull latest data from Firebase when switching to key tabs
+  if(['dashboard','catalog','borrowers','lending','overdues','checkout'].includes(tab)){
+    fbSyncPull(false);
+  }
 }
 
 /* ══ DASHBOARD ══ */
@@ -789,7 +793,8 @@ function renderDash(){
   el.innerHTML=`
   <div style="display:flex;gap:8px;margin-bottom:16px;flex-wrap:wrap;align-items:center">
     <button class="btn btn-sm" onclick="showTab('admin')" style="color:var(--navy);border-color:var(--sky)">⚙ Admin &amp; Export</button>
-    <button class="btn btn-sm" id="sync-btn" onclick="fbSyncPush()" style="color:#2a7a42;border-color:#2a7a42;font-weight:600">☁ Sync to shared database</button>
+    <button class="btn btn-sm" id="sync-btn" onclick="fbSyncPush()" style="color:#2a7a42;border-color:#2a7a42;font-weight:600">☁ Push to database</button>
+    <button class="btn btn-sm" id="pull-btn" onclick="fbSyncPull(true)" style="color:var(--navy);border-color:var(--sky);font-weight:600">↓ Pull from database</button>
     <span id="sync-status" style="font-size:12px;color:var(--muted)"></span>
   </div>
   <div class="stats-grid">
@@ -843,52 +848,68 @@ function addBookAsCopy(){const title=document.getElementById('f-title').value.tr
 
 /* ══ LOOKUP TAB SWITCHER ══ */
 
+
+function autoFillCatLang(title, authors, subjects, langCode){
+  const catSel=document.getElementById('f-cat');
+  const langSel=document.getElementById('f-lang');
+
+  // ── Category ──
+  if(catSel){
+    const guessed=guessCategoryFromBook(title, authors, subjects);
+    if(guessed){
+      catSel.value=guessed;
+      flashField(catSel);
+    }
+  }
+
+  // ── Language ──
+  if(langSel){
+    let lang='';
+    // First try the langCode from the API (most reliable)
+    if(langCode){
+      const lm={en:'English',pa:'Punjabi (Gurmukhi)',hi:'Hindi',ur:'Urdu',
+                sa:'Sanskrit',fr:'French',es:'Spanish',fa:'Farsi / Persian'};
+      lang=lm[langCode]||'';
+    }
+    // Fall back to script detection and title keywords
+    if(!lang){
+      const t=(title||'').toLowerCase();
+      if(/[\u0A00-\u0A7F]/.test(title)) lang='Punjabi (Gurmukhi)';
+      else if(/[\u0600-\u06FF]/.test(title)) lang='Punjabi (Shahmukhi)';
+      else if(/[\u0900-\u097F]/.test(title)) lang='Hindi';
+      else if(/sahib|gurbani|shabad|japji|nitnem|gutka|granth|ik onkar|waheguru/.test(t)) lang='Punjabi (Gurmukhi)';
+      else if(/farsi|persian/.test(t)) lang='Farsi / Persian';
+      else if(/sanskrit/.test(t)) lang='Sanskrit';
+      else if(/urdu/.test(t)) lang='Urdu';
+      else lang='English';
+    }
+    if(lang){
+      langSel.value=lang;
+      flashField(langSel);
+    }
+  }
+}
+
+function flashField(el){
+  if(!el) return;
+  el.style.borderColor='var(--gold)';
+  el.style.background='var(--gold-lt)';
+  setTimeout(()=>{el.style.borderColor='';el.style.background='';}, 2500);
+}
+
 function autoGuessCategory(){
   const title=document.getElementById('f-title').value.trim();
   const authors=getAuthors().join(', ');
   if(!title){alert('Please enter a title first.');return;}
-  const t=title.toLowerCase(), a=authors.toLowerCase();
-  let detected=[];
-
-  // Guess category - always override
+  autoFillCatLang(title, authors, []);
+  // Show feedback
   const catSel=document.getElementById('f-cat');
-  if(catSel){
-    const guessed=guessCategoryFromBook(title,authors,[]);
-    if(guessed){
-      catSel.value=guessed;
-      catSel.style.borderColor='var(--gold)';catSel.style.background='var(--gold-lt)';
-      setTimeout(()=>{catSel.style.borderColor='';catSel.style.background='';},2500);
-      detected.push('Category: '+catInfo(guessed).label);
-    } else {
-      detected.push('Category: could not detect — please select manually');
-    }
-  }
-
-  // Guess language - always override
   const langSel=document.getElementById('f-lang');
-  if(langSel){
-    let lang='';
-    if(/[\u0A00-\u0A7F]/.test(title)) lang='Punjabi (Gurmukhi)';
-    else if(/[\u0600-\u06FF]/.test(title)) lang='Punjabi (Shahmukhi)';
-    else if(/[\u0900-\u097F]/.test(title)) lang='Hindi';
-    else if(/sahib|gurbani|shabad|kirtan|paath|japji|nitnem|gutka|granth|ik onkar|waheguru/.test(t)) lang='Punjabi (Gurmukhi)';
-    else if(/farsi|persian|farsee/.test(t)) lang='Farsi / Persian';
-    else if(/sanskrit|sanscrit/.test(t)) lang='Sanskrit';
-    else if(/urdu/.test(t)) lang='Urdu';
-    else if(/hindi|devanagari/.test(t)) lang='Hindi';
-    else lang='English'; // default to English for Roman script titles
-    if(lang){
-      langSel.value=lang;
-      langSel.style.borderColor='var(--gold)';langSel.style.background='var(--gold-lt)';
-      setTimeout(()=>{langSel.style.borderColor='';langSel.style.background='';},2500);
-      detected.push('Language: '+lang);
-    }
-  }
-
-  // Show what was detected
+  const catLabel=catSel&&catSel.value?catInfo(catSel.value).label:'not detected';
+  const langLabel=langSel&&langSel.value?langSel.value:'not detected';
   const msgEl=document.getElementById('autodetect-msg');
   if(msgEl){
-    msgEl.textContent='✓ Detected — '+detected.join(' | ')+' (adjust if wrong)';
+    msgEl.textContent=`✓ Category: ${catLabel} | Language: ${langLabel} — adjust if wrong`;
     msgEl.style.display='block';
     setTimeout(()=>msgEl.style.display='none',4000);
   }
@@ -1028,6 +1049,11 @@ function fillLookup(){
   document.getElementById('f-pub').value=(lookupData.publishers||[]).map(p=>p.name).join(', ');
   document.getElementById('f-year').value=lookupData.publish_date||'';
   document.getElementById('f-isbn').value=lookupData._isbn||'';
+  // Auto-fill category and language from metadata
+  const subjects=(lookupData.subjects||[]).map(s=>s.name||s);
+  const title=lookupData.title||'';
+  const authorStr=authors.join(', ');
+  autoFillCatLang(title, authorStr, subjects);
 }
 
 function addBook(){
@@ -1854,7 +1880,9 @@ async function fbSyncPush(){
   }catch(e){setSyncStatus('Sync failed: '+e.message,false);}
   if(btn){btn.textContent='☁ Sync to shared database';btn.disabled=false;}
 }
-async function fbSyncPull(){
+async function fbSyncPull(manual){
+  const btn=document.getElementById('pull-btn');
+  if(btn&&manual){btn.textContent='↓ Loading…';btn.disabled=true;}
   setSyncStatus('Loading from shared database…',null);
   try{
     const [fbBooks,fbLoans,fbBorr]=await Promise.all([fbLoad('books'),fbLoad('loans'),fbLoad('borrowers')]);
@@ -1865,11 +1893,12 @@ async function fbSyncPull(){
     if(updated){
       try{localStorage.setItem('gw_books',JSON.stringify(books));localStorage.setItem('gw_loans',JSON.stringify(loans));localStorage.setItem('gw_borrowers',JSON.stringify(borrowers));}catch(e){}
       renderDash();
-      setSyncStatus('✓ Loaded '+books.length+' books from shared database',true);
+      setSyncStatus('✓ Loaded '+books.length+' books, '+borrowers.length+' borrowers from shared database',true);
     }else{
-      setSyncStatus(books.length>0?books.length+' books (local) — click Sync to share with other devices':'Database empty — add books then click Sync',null);
+      setSyncStatus(books.length>0?books.length+' books loaded (local) — push to share':'Database empty — add books and push',null);
     }
-  }catch(e){setSyncStatus('Working offline',false);}
+  }catch(e){setSyncStatus('Working offline — '+e.message,false);}
+  if(btn&&manual){btn.textContent='↓ Pull from database';btn.disabled=false;}
 }
 function setSyncStatus(msg,ok){
   const el=document.getElementById('sync-status');
