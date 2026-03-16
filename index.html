@@ -616,13 +616,21 @@ const FB_BASE = `https://firestore.googleapis.com/v1/projects/${FB_PROJECT}/data
 
 async function fbSave(collection, dataArray) {
   try {
-    // Strip cover images — too large for Firestore
+    // First load what's already in Firebase
+    const existing = await fbLoad(collection) || [];
+    // Merge: combine existing + new, deduplicate by id
+    const merged = [...existing];
     const toStore = collection === 'books'
       ? dataArray.map(item => ({...item, coverImage: null}))
       : dataArray;
+    toStore.forEach(newItem => {
+      const idx = merged.findIndex(e => e.id === newItem.id);
+      if(idx >= 0) merged[idx] = newItem; // update existing
+      else merged.push(newItem); // add new
+    });
     const body = {
       fields: {
-        data: { stringValue: JSON.stringify(toStore) },
+        data: { stringValue: JSON.stringify(merged) },
         updated: { integerValue: Date.now().toString() }
       }
     };
@@ -632,6 +640,10 @@ async function fbSave(collection, dataArray) {
       body: JSON.stringify(body)
     });
     if (!r.ok) throw new Error('HTTP ' + r.status);
+    // Update local data with merged result
+    if(collection==='books'){books=merged;loadCoversLocally();}
+    else if(collection==='loans') loans=merged;
+    else if(collection==='borrowers') borrowers=merged;
     return true;
   } catch(e) {
     console.warn('Firebase save failed:', e.message);
