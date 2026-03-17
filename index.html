@@ -5,9 +5,9 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
 <title>Sangat Library — Sikh Spiritual Centre Toronto</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
-<link href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;500;600;700&family=Noto+Sans+Gurmukhi&family=Noto+Sans+Devanagari&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Noto+Sans+Gurmukhi&family=Noto+Sans+Devanagari&display=swap" rel="stylesheet">
 <style>
-@import url('https://fonts.googleapis.com/css2?family=Outfit:wght@400;500;600;700&family=Noto+Serif:ital@0;1&family=Noto+Sans+Gurmukhi&family=Noto+Sans+Devanagari&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Noto+Serif:ital@0;1&family=Noto+Sans+Gurmukhi&family=Noto+Sans+Devanagari&display=swap');
 
 /* ── TOKENS ─────────────────────────────────────────────────────── */
 :root{
@@ -28,7 +28,7 @@
 
 /* ── RESET ───────────────────────────────────────────────────────── */
 *{box-sizing:border-box;margin:0;padding:0}
-body{font-family:'Outfit',sans-serif;font-size:15px;color:var(--text);background:var(--bg);min-height:100vh}
+body{font-family:'Inter',sans-serif;font-size:15px;color:var(--text);background:var(--bg);min-height:100vh;-webkit-font-smoothing:antialiased;-moz-osx-font-smoothing:grayscale}
 
 /* ── LAYOUT ──────────────────────────────────────────────────────── */
 .app{max-width:980px;margin:0 auto;padding:0 16px 60px}
@@ -110,7 +110,7 @@ nav{
 .book-row:last-child{border-bottom:none;padding-bottom:0}
 .book-row:first-child{padding-top:0}
 .book-id{
-  font-size:11px;font-family:'Outfit',monospace;
+  font-size:11px;font-family:'Inter',monospace;
   background:var(--navy);color:#fff;
   padding:3px 9px;border-radius:20px;
   white-space:nowrap;flex-shrink:0;font-weight:600;
@@ -133,7 +133,7 @@ nav{
   padding:9px 18px;border-radius:var(--radius-sm);
   border:1.5px solid var(--border);background:var(--surface);
   cursor:pointer;font-size:13px;color:var(--text);
-  font-weight:600;font-family:'Outfit',sans-serif;
+  font-weight:600;font-family:'Inter',sans-serif;
   transition:all .15s;letter-spacing:.01em;
   min-height:38px;touch-action:manipulation;
 }
@@ -158,7 +158,7 @@ input,select,textarea{
   border:1.5px solid var(--border);
   border-radius:var(--radius-sm);
   background:var(--surface);color:var(--text);
-  font-size:14px;font-family:'Outfit',sans-serif;
+  font-size:14px;font-family:'Inter',sans-serif;
   transition:border-color .15s, box-shadow .15s;
 }
 input:focus,select:focus,textarea:focus{
@@ -206,7 +206,7 @@ input::placeholder{color:#bbb}
   padding:5px 14px;border-radius:20px;
   border:1.5px solid var(--border);background:var(--surface);
   cursor:pointer;font-size:12px;color:var(--muted);
-  font-weight:500;font-family:'Outfit',sans-serif;
+  font-weight:500;font-family:'Inter',sans-serif;
   transition:all .15s;
 }
 .chip:hover{border-color:var(--gold);color:var(--gold-dark)}
@@ -245,7 +245,7 @@ input::placeholder{color:#bbb}
 }
 .label-card:hover{border-color:var(--gold);transform:translateY(-2px);box-shadow:var(--shadow)}
 .label-card.selected{border-color:var(--gold);background:var(--gold-lt);box-shadow:0 0 0 3px rgba(210,153,75,.15)}
-.label-card .lc-id{font-family:'Outfit',monospace;font-size:14px;font-weight:700;color:var(--navy);margin-bottom:4px}
+.label-card .lc-id{font-family:'Inter',monospace;font-size:14px;font-weight:700;color:var(--navy);margin-bottom:4px}
 .label-card .lc-title{font-size:12px;color:var(--text);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;margin-bottom:3px}
 .label-card .lc-meta{font-size:11px;color:var(--muted)}
 .label-card .lc-org{font-size:10px;color:#bbb;margin-top:6px;border-top:1px solid var(--border);padding-top:5px}
@@ -311,7 +311,7 @@ pre.code-block{
   padding:9px 14px;border-radius:var(--radius-sm);
   border:1.5px solid var(--gold);background:var(--gold-lt);
   color:var(--gold-dark);cursor:pointer;font-size:13px;
-  font-weight:600;white-space:nowrap;font-family:'Outfit',sans-serif;
+  font-weight:600;white-space:nowrap;font-family:'Inter',sans-serif;
   transition:all .15s;
 }
 .scan-btn:hover{background:var(--gold-mid);box-shadow:0 2px 8px rgba(210,153,75,.25)}
@@ -368,8 +368,8 @@ pre.code-block{
   transition:all .1s;user-select:none;
 }
 .kbd-key:active{background:var(--gold-lt);border-color:var(--gold);transform:scale(.93)}
-.kbd-key.fn{font-size:12px;min-width:52px;background:var(--tan-lt);font-family:'Outfit',sans-serif}
-.kbd-key.space{min-width:160px;font-size:12px;background:var(--tan-lt);font-family:'Outfit',sans-serif}
+.kbd-key.fn{font-size:12px;min-width:52px;background:var(--tan-lt);font-family:'Inter',sans-serif}
+.kbd-key.space{min-width:160px;font-size:12px;background:var(--tan-lt);font-family:'Inter',sans-serif}
 .kbd-sec{font-size:10px;color:var(--muted);width:100%;margin-top:6px;font-weight:700;text-transform:uppercase;letter-spacing:.06em}
 
 /* ── SCANNER ─────────────────────────────────────────────────────── */
@@ -393,7 +393,7 @@ pre.code-block{
 .scanner-manual-row input{
   flex:1;background:#222;border:1.5px solid #444;
   color:#fff;border-radius:var(--radius-sm);
-  padding:9px 12px;font-size:14px;font-family:'Outfit',sans-serif;
+  padding:9px 12px;font-size:14px;font-family:'Inter',sans-serif;
 }
 .scanner-manual-row input::placeholder{color:#666}
 .scanner-manual-row input:focus{border-color:var(--gold);outline:none}
@@ -417,7 +417,7 @@ pre.code-block{
   align-items:center;gap:3px;padding:6px 2px;
   border:none;background:none;cursor:pointer;
   color:var(--muted);font-size:10px;font-weight:600;
-  font-family:'Outfit',sans-serif;
+  font-family:'Inter',sans-serif;
   touch-action:manipulation;min-height:52px;justify-content:center;
   letter-spacing:.02em;text-transform:uppercase;
   transition:color .15s;
@@ -489,12 +489,14 @@ pre.code-block{
 .pub-action-grid { grid-template-columns: 1fr 1fr 1fr; }
 @media(max-width:900px){ .pub-action-grid { grid-template-columns: 1fr 1fr; } }
 @media(max-width:600px){ .pub-action-grid { grid-template-columns: 1fr; } }
+@media(max-width:500px){ .join-grid { grid-template-columns: 1fr; } }
 
 .rev-star { user-select:none; }
 
 .pub-action-grid { grid-template-columns: 1fr 1fr 1fr; }
 @media(max-width:900px){ .pub-action-grid { grid-template-columns: 1fr 1fr; } }
 @media(max-width:600px){ .pub-action-grid { grid-template-columns: 1fr; } }
+@media(max-width:500px){ .join-grid { grid-template-columns: 1fr; } }
 .rev-star { user-select:none; }
 .staff-tab { display:none; }
 </style>
@@ -871,7 +873,7 @@ function renderDash(){
   <div class="stats-grid">
     <div class="stat"><div class="stat-n">${total}</div><div class="stat-l">Total books</div></div>
     <div class="stat"><div class="stat-n" style="color:#4F6275">${available}</div><div class="stat-l">Available</div></div>
-    <div class="stat"><div class="stat-n" style="color:#2d5a72">${out}</div><div class="stat-l">On loan</div></div>
+    <div class="stat"><div class="stat-n" style="color:var(--navy)">${out}</div><div class="stat-l">On loan</div></div>
     <div class="stat"><div class="stat-n" style="color:#c62828">${overdue}</div><div class="stat-l">Overdue</div></div>
   </div>
 
@@ -1379,7 +1381,7 @@ function printLabels(){if(!selectedLabels.size)return;const sel=books.filter(b=>
 
 /* ══ LIBRARY CARDS ══ */
 function preSelectCard(id){selectedCards.clear();selectedCards.add(id);renderLibCards();}
-function lCardHTML(b,forPrint){const since=b.joinDate?new Date(b.joinDate).getFullYear():'';if(forPrint)return`<div class="print-lcard"><div style="position:absolute;right:-10px;bottom:-20px;font-size:90px;opacity:.07">☬</div><div style="display:flex;align-items:center;gap:8px;margin-bottom:12px"><div style="font-size:22px">☬</div><div><div style="font-size:10px;opacity:.85;font-weight:600">Sikh Spiritual Centre Toronto</div><div style="font-size:9px;opacity:.6;letter-spacing:.05em">LENDING LIBRARY</div></div></div><div style="font-size:17px;font-weight:600;margin-bottom:3px">${escH(b.name)}</div><div style="font-size:12px;font-family:monospace;opacity:.75;letter-spacing:.1em;margin-bottom:6px">${b.id}</div><div style="font-size:10px;opacity:.7;line-height:1.7">${b.email||''}${b.phone?'\n'+b.phone:''}</div><div style="position:absolute;bottom:10px;right:14px;font-size:9px;opacity:.5">Member since ${since}</div></div>`;return`<div class="lcard-preview"><div style="position:absolute;right:-10px;bottom:-20px;font-size:90px;opacity:.07">☬</div><div style="display:flex;align-items:center;gap:8px;margin-bottom:10px"><div style="font-size:20px;opacity:.9">☬</div><div><div style="font-size:11px;opacity:.85;font-weight:600">Sikh Spiritual Centre Toronto</div><div style="font-size:10px;opacity:.65">LENDING LIBRARY</div></div></div><div style="font-size:18px;font-weight:600;margin-bottom:3px">${escH(b.name)}</div><div style="font-size:12px;font-family:monospace;opacity:.8;letter-spacing:.1em;margin-bottom:8px">${b.id}</div><div style="font-size:11px;opacity:.75">${b.email||''}${b.phone?' | '+b.phone:''}</div><div style="position:absolute;bottom:14px;right:16px;font-size:10px;opacity:.55">Member since ${since}</div></div>`;}
+function lCardHTML(b,forPrint){const since=b.joinDate?new Date(b.joinDate).getFullYear():'';if(forPrint)return`<div class="print-lcard"><div style="display:flex;align-items:center;gap:8px;margin-bottom:12px"><div style="font-size:22px">☬</div><div><div style="font-size:10px;opacity:.85;font-weight:600">Sikh Spiritual Centre Toronto</div><div style="font-size:9px;opacity:.6;letter-spacing:.05em">LENDING LIBRARY</div></div></div><div style="font-size:17px;font-weight:600;margin-bottom:3px">${escH(b.name)}</div><div style="font-size:12px;font-family:monospace;opacity:.75;letter-spacing:.1em;margin-bottom:6px">${b.id}</div><div style="font-size:10px;opacity:.7;line-height:1.7">${b.email||''}${b.phone?'\n'+b.phone:''}</div><div style="position:absolute;bottom:10px;right:14px;font-size:9px;opacity:.5">Member since ${since}</div></div>`;return`<div class="lcard-preview"><div style="display:flex;align-items:center;gap:8px;margin-bottom:10px"><div style="font-size:20px;opacity:.9">☬</div><div><div style="font-size:11px;opacity:.85;font-weight:600">Sikh Spiritual Centre Toronto</div><div style="font-size:10px;opacity:.65">LENDING LIBRARY</div></div></div><div style="font-size:18px;font-weight:600;margin-bottom:3px">${escH(b.name)}</div><div style="font-size:12px;font-family:monospace;opacity:.8;letter-spacing:.1em;margin-bottom:8px">${b.id}</div><div style="font-size:11px;opacity:.75">${b.email||''}${b.phone?' | '+b.phone:''}</div><div style="position:absolute;bottom:14px;right:16px;font-size:10px;opacity:.55">Member since ${since}</div></div>`;}
 function renderLibCards(){const el=document.getElementById('pg-libcards');if(!borrowers.length){el.innerHTML=`<div class="empty" style="padding:60px">No borrowers registered yet.<br><br><button class="btn btn-primary" onclick="showTab('borrowers')">Register borrowers →</button></div>`;return;}el.innerHTML=`<div style="display:flex;align-items:center;gap:10px;margin-bottom:16px;flex-wrap:wrap"><div style="flex:1;font-size:13px;color:var(--muted)">${selectedCards.size} card${selectedCards.size!==1?'s':''} selected — prints at credit card size</div><button class="btn btn-sm" onclick="selectedCards=new Set(borrowers.map(b=>b.id));renderLibCards()">Select all</button><button class="btn btn-sm" onclick="selectedCards.clear();renderLibCards()">Clear all</button><button class="btn btn-primary btn-sm" onclick="printCards()" ${!selectedCards.size?'disabled':''}>Print (${selectedCards.size})</button></div><div class="card-grid">${borrowers.map(b=>{const sel=selectedCards.has(b.id);return`<div class="lcard-wrap ${sel?'selected':''}" onclick="toggleCard('${b.id}')">${lCardHTML(b,false)}<div style="text-align:center;font-size:12px;color:var(--muted);margin-top:8px">${sel?'☑ Selected':'Click to select'}</div></div>`}).join('')}</div>`;}
 function toggleCard(id){if(selectedCards.has(id))selectedCards.delete(id);else selectedCards.add(id);renderLibCards();}
 function printCards(){if(!selectedCards.size)return;const sel=borrowers.filter(b=>selectedCards.has(b.id));const pa=document.getElementById('print-area');pa.innerHTML=`<div style="font-family:sans-serif;padding:8px"><p style="font-size:11px;color:#666;margin-bottom:10px">Sikh Spiritual Centre Toronto — Library Cards — ${new Date().toLocaleDateString('en-CA')}</p>${sel.map(b=>lCardHTML(b,true)).join('')}</div>`;window.print();}
@@ -1983,9 +1985,8 @@ function renderPublic(){
 
   el.innerHTML=`
   <!-- Hero banner -->
-  <div style="background:linear-gradient(135deg,var(--navy) 0%,#2d5a72 100%);color:#fff;border-radius:var(--radius);padding:24px 20px;margin-bottom:20px;position:relative;overflow:hidden">
-    <div style="position:absolute;right:-20px;bottom:-30px;font-size:120px;opacity:.06">☬</div>
-
+  <div style="background:var(--navy);color:#fff;border-radius:var(--radius);padding:24px 20px;margin-bottom:20px;position:relative;overflow:hidden">
+    
     <div style="font-size:18px;font-weight:700;margin-bottom:4px">Welcome to the Sangat Library Collection</div>
     <div style="font-size:13px;opacity:.8;margin-bottom:14px">Sikh Spiritual Centre Toronto</div>
     <div style="display:flex;gap:12px;flex-wrap:wrap">
@@ -2011,6 +2012,23 @@ function renderPublic(){
       </div>
     </div>
   </div>`:''}
+
+  <!-- Join the Library -->
+  <div style="background:var(--gold);border-radius:var(--radius);padding:24px 20px;margin-bottom:20px;color:#1c1a17;position:relative;overflow:hidden">
+        <div style="font-size:18px;font-weight:700;margin-bottom:6px">🪪 Join the Sangat Library</div>
+    <div style="font-size:13px;opacity:.85;margin-bottom:18px;line-height:1.6">Become a member to borrow books. Free for all sangat. Register in seconds — you'll get a member card with a scannable barcode.</div>
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:12px" class="join-grid">
+      <input type="text" id="join-fname" placeholder="First name *" style="background:#fff;border:1px solid rgba(0,0,0,.15);color:#1c1a17;border-radius:8px;padding:10px 12px;font-size:14px;font-family:inherit;width:100%;box-sizing:border-box">
+      <input type="text" id="join-lname" placeholder="Last name *" style="background:#fff;border:1px solid rgba(0,0,0,.15);color:#1c1a17;border-radius:8px;padding:10px 12px;font-size:14px;font-family:inherit;width:100%;box-sizing:border-box">
+      <input type="email" id="join-email" placeholder="Email address *" style="background:#fff;border:1px solid rgba(0,0,0,.15);color:#1c1a17;border-radius:8px;padding:10px 12px;font-size:14px;font-family:inherit;width:100%;box-sizing:border-box">
+      <input type="text" id="join-phone" placeholder="Phone number *" style="background:#fff;border:1px solid rgba(0,0,0,.15);color:#1c1a17;border-radius:8px;padding:10px 12px;font-size:14px;font-family:inherit;width:100%;box-sizing:border-box">
+    </div>
+    <button onclick="selfRegister()" style="background:var(--navy);border:none;color:#fff;font-weight:700;font-size:14px;padding:12px 28px;border-radius:8px;cursor:pointer;font-family:inherit">Register as member →</button>
+    <div id="join-msg" style="font-size:13px;margin-top:10px;opacity:.9"></div>
+  </div>
+
+  <!-- Member card result -->
+  <div id="member-card-result" style="margin-bottom:20px"></div>
 
   <!-- Member lookup -->
   <div style="background:#fff;border:1.5px solid var(--border);border-radius:var(--radius);padding:16px 18px;margin-bottom:20px">
@@ -2087,9 +2105,8 @@ function renderPublic(){
       <div style="font-size:11px;color:var(--muted);margin-top:6px">No spam, ever.</div>
     </div>
 
-    <div style="background:linear-gradient(135deg,var(--navy) 0%,#2d5a72 100%);border-radius:var(--radius);padding:20px 18px;color:#fff;position:relative;overflow:hidden">
-      <div style="position:absolute;right:-10px;bottom:-20px;font-size:80px;opacity:.08">☬</div>
-      <div style="font-size:15px;font-weight:700;margin-bottom:6px">🙏 Support our library</div>
+    <div style="background:var(--navy);border-radius:var(--radius);padding:20px 18px;color:#fff;position:relative;overflow:hidden">
+            <div style="font-size:15px;font-weight:700;margin-bottom:6px">🙏 Support our library</div>
       <div style="font-size:12px;opacity:.85;margin-bottom:12px;line-height:1.6">Your seva helps us grow our collection and serve the Sangat. Donate <strong>new books</strong> to grow our collection, or give financially.</div>
       <a href="https://ssctoronto.org/donate" target="_blank" rel="noopener" style="display:block;background:var(--gold);color:#fff;text-align:center;padding:10px;border-radius:8px;font-weight:700;font-size:13px;text-decoration:none;margin-bottom:8px">💛 Donate at ssctoronto.org</a>
       <div style="font-size:11px;opacity:.7;text-align:center">Or drop off books at the Gurdwara front desk</div>
@@ -2324,6 +2341,91 @@ function saveWishlist(){ try{localStorage.setItem('gw_wishlist',JSON.stringify(w
 function loadWishlist(){ try{const w=localStorage.getItem('gw_wishlist');if(w)wishlist=JSON.parse(w);}catch(e){} }
 function saveSaleItems(){ try{localStorage.setItem('gw_sale',JSON.stringify(saleItems));}catch(e){} }
 function loadSaleItems(){ try{const s=localStorage.getItem('gw_sale');if(s)saleItems=JSON.parse(s);}catch(e){} }
+
+
+/* ══ SELF REGISTRATION ══ */
+function selfRegister(){
+  const fname=document.getElementById('join-fname').value.trim();
+  const lname=document.getElementById('join-lname').value.trim();
+  const email=document.getElementById('join-email').value.trim();
+  const phone=document.getElementById('join-phone').value.trim();
+  const msgEl=document.getElementById('join-msg');
+
+  if(!fname||!lname){
+    if(msgEl){msgEl.textContent='Please enter your first and last name.';msgEl.style.color='#ffcccc';}
+    return;
+  }
+  if(!email){
+    if(msgEl){msgEl.textContent='Please enter your email address.';msgEl.style.color='#ffcccc';}
+    return;
+  }
+  if(!phone){
+    if(msgEl){msgEl.textContent='Please enter your phone number.';msgEl.style.color='#ffcccc';}
+    return;
+  }
+
+  // Check if already registered by email
+  if(email){
+    const existing=borrowers.find(b=>b.email&&b.email.toLowerCase()===email.toLowerCase());
+    if(existing){
+      if(msgEl){msgEl.textContent='';}
+      showMemberCard(existing);
+      return;
+    }
+  }
+
+  // Register new member
+  const id=genMbrId();
+  const newMember={id,name:fname+' '+lname,email,phone,address:'',notes:'Self-registered via public portal',joinDate:new Date().toISOString().split('T')[0]};
+  borrowers.push(newMember);
+  save();
+
+  // Clear form
+  ['join-fname','join-lname','join-email','join-phone'].forEach(fid=>{
+    const el=document.getElementById(fid);if(el)el.value='';
+  });
+  if(msgEl)msgEl.textContent='';
+
+  showMemberCard(newMember);
+}
+
+function showMemberCard(member){
+  const resultDiv=document.getElementById('member-card-result');
+  if(!resultDiv)return;
+
+  resultDiv.style.display='block';
+  resultDiv.innerHTML=`
+    <div style="background:#fff;border:2px solid var(--gold);border-radius:var(--radius);padding:24px;text-align:center;max-width:420px;margin:0 auto">
+      <div style="font-size:14px;font-weight:700;color:#2a7a42;margin-bottom:16px">✓ Welcome to the Sangat Library!</div>
+      <div style="background:var(--navy);border-radius:12px;padding:20px 24px;color:#fff;margin-bottom:16px;position:relative;overflow:hidden">
+                <div style="font-size:11px;opacity:.7;letter-spacing:.1em;text-transform:uppercase;margin-bottom:6px">Sikh Spiritual Centre Toronto</div>
+        <div style="font-size:20px;font-weight:700;margin-bottom:2px">${escH(member.name)}</div>
+        <div style="font-size:13px;font-family:monospace;opacity:.8;margin-bottom:14px">${member.id}</div>
+        <div id="member-barcode-${member.id}" style="background:#fff;border-radius:6px;padding:8px;display:inline-block"></div>
+        <div style="font-size:10px;opacity:.6;margin-top:8px">Sangat Library Member Card</div>
+      </div>
+      <div style="font-size:12px;color:var(--muted);margin-bottom:14px;line-height:1.6">
+        📱 <strong>Screenshot this card</strong> and save it to your phone.<br>
+        Show the barcode at the library desk to borrow books.
+      </div>
+      <div style="font-size:13px;color:var(--muted);background:var(--tan-lt);border-radius:8px;padding:10px 14px">
+        Your Member ID: <strong style="font-family:monospace;color:var(--navy)">${member.id}</strong>
+      </div>
+    </div>`;
+
+  // Generate barcode
+  setTimeout(()=>{
+    const el=document.getElementById('member-barcode-'+member.id);
+    if(el){
+      try{
+        JsBarcode(el,member.id,{format:'CODE128',width:2,height:50,displayValue:true,fontSize:12,margin:4});
+      }catch(e){el.textContent=member.id;}
+    }
+  },100);
+
+  // Scroll to the card
+  resultDiv.scrollIntoView({behavior:'smooth',block:'center'});
+}
 
 /* ══ INIT ══ */
 load();
